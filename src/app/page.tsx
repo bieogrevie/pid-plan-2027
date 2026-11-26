@@ -35,6 +35,12 @@ function DetailBody({ page }: { page: DetailPage }) {
   </>;
 }
 
+// Sapaan sesuai jam lokal perangkat (menggantikan jam di layar awal).
+const greeting = (d: Date) => {
+  const h = d.getHours();
+  return h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : "Good Evening";
+};
+
 export default function Home() {
   const [open, setOpen] = useState<{ tile: number; page: number } | null>(null);
   const [closing, setClosing] = useState(false);
@@ -137,11 +143,12 @@ export default function Home() {
       <div className="start-brand">
         <small className="header-eyebrow">RENCANA STRATEGIS OPERASIONAL 2027 · PID / TV KERETA</small>
         <h1>PID Maintenance<br />Improvement Plan 2027</h1>
+        <p className="start-dept">Operations &amp; Maintenance Department</p>
       </div>
       <div className="start-bottom">
         <div className="start-clock" suppressHydrationWarning>
-          <strong>{now ? now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "\u00a0"}</strong>
-          <span>{now ? now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" }) : "\u00a0"}</span>
+          <strong>{now ? greeting(now) : "\u00a0"}</strong>
+          <span>{now ? now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "\u00a0"}</span>
         </div>
         <button className="start-next" onClick={e => { e.stopPropagation(); enter(); }} aria-label="Masuk ke halaman utama">
           <span>Next</span><Arrow />
