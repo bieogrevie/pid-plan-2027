@@ -39,6 +39,31 @@ export default function Home() {
   const [open, setOpen] = useState<{ tile: number; page: number } | null>(null);
   const [closing, setClosing] = useState(false);
   const [clip, setClip] = useState("inset(0)");
+  // Layar awal gaya lock screen Windows 8: "intro" -> "leaving" (layar terangkat) -> "done" (halaman tile).
+  const [intro, setIntro] = useState<"intro" | "leaving" | "done">("intro");
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (intro === "done") return;
+    setNow(new Date());
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, [intro]);
+
+  const enter = useCallback(() => {
+    if (intro !== "intro") return;
+    setIntro("leaving");
+    window.setTimeout(() => setIntro("done"), 700);
+  }, [intro]);
+
+  useEffect(() => {
+    if (intro !== "intro") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "PageDown") { e.preventDefault(); enter(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [intro, enter]);
 
   const toggleFullscreen = async () => {
     try {
@@ -107,7 +132,22 @@ export default function Home() {
   const tile = open ? tiles[open.tile] : null;
   const page = tile && open ? tile.pages[open.page] : null;
 
-  return <main className="metro-shell">
+  return <main className={`metro-shell ${intro === "done" ? "" : "pre-start"} ${intro === "leaving" ? "starting" : ""}`}>
+    {intro !== "done" && <section className={`start-screen ${intro === "leaving" ? "leaving" : ""}`} aria-label="Layar awal" onClick={enter}>
+      <div className="start-brand">
+        <small className="header-eyebrow">RENCANA STRATEGIS OPERASIONAL 2027 · PID / TV KERETA</small>
+        <h1>PID Maintenance<br />Improvement Plan 2027</h1>
+      </div>
+      <div className="start-bottom">
+        <div className="start-clock" suppressHydrationWarning>
+          <strong>{now ? now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "\u00a0"}</strong>
+          <span>{now ? now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" }) : "\u00a0"}</span>
+        </div>
+        <button className="start-next" onClick={e => { e.stopPropagation(); enter(); }} aria-label="Masuk ke halaman utama">
+          <span>Next</span><Arrow />
+        </button>
+      </div>
+    </section>}
     <header className="metro-header">
       <div><small className="header-eyebrow">RENCANA STRATEGIS OPERASIONAL 2027 · PID / TV KERETA</small><h1>PID Maintenance Improvement Plan 2027</h1></div>
       <button className="fullscreen-button" onClick={toggleFullscreen} aria-label="Tampilkan layar penuh" title="Layar penuh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>

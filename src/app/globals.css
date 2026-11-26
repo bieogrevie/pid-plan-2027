@@ -433,3 +433,21 @@ body,.metro-shell{font-family:var(--font-body),Arial,sans-serif;font-weight:500}
 /* Target (stats + fill): angka target besar, judul tegas */
 .detail-content.fill .layout-stats .detail-value{font-size:clamp(26px,2.3vw,44px);font-weight:700;margin-bottom:.3vh}
 .detail-content.fill .layout-stats .detail-item h3{color:var(--ink);font-family:var(--font-display),sans-serif;font-weight:700;font-size:clamp(14px,1.05vw,20px)}
+
+/* Layar awal gaya lock screen Windows 8: jam besar kiri bawah, klik Next -> layar terangkat ke atas. */
+.start-screen{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:space-between;padding:8vh 7vw;color:#fff;cursor:pointer;background:linear-gradient(180deg,rgba(3,21,40,.35) 0%,rgba(3,21,40,.15) 45%,rgba(3,21,40,.85) 100%),url('../../public/krl-lines-green.png') center 62%/cover no-repeat,#031528;transition:transform .7s cubic-bezier(.7,0,.3,1);animation:start-in .6s ease-out both}
+.start-screen.leaving{transform:translateY(-100%)}
+.start-brand h1{margin:0;font-family:var(--font-display),sans-serif;font-weight:800;font-size:clamp(36px,4.4vw,84px);line-height:1.05;letter-spacing:-.03em}
+.start-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:4vw}
+.start-clock strong{display:block;font-family:var(--font-display),sans-serif;font-weight:600;font-size:clamp(80px,11vw,210px);line-height:.95;letter-spacing:-.04em}
+.start-clock span{display:block;margin-top:1vh;font-size:clamp(22px,2.4vw,46px);font-weight:500;text-transform:capitalize}
+.start-next{display:flex;align-items:center;gap:1vw;padding:1.4vh 1.6vw 1.4vh 2.2vw;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.08);color:#fff;font:600 clamp(16px,1.4vw,28px) var(--font-body),sans-serif;letter-spacing:.06em;cursor:pointer;transition:background .2s,transform .2s}
+.start-next:hover,.start-next:focus-visible{background:rgba(255,255,255,.22);transform:translateX(4px)}
+.start-next svg{width:clamp(18px,1.5vw,30px);height:clamp(18px,1.5vw,30px)}
+@keyframes start-in{from{opacity:0}to{opacity:1}}
+/* Tile masuk dari kanan setelah layar awal terangkat, seperti Start screen Windows 8. */
+.metro-shell.pre-start:not(.starting) .group-stage,.metro-shell.pre-start:not(.starting) .metro-header{opacity:0}
+.metro-shell.starting .tile-group{animation:tiles-in .7s cubic-bezier(.2,.75,.2,1) .25s both}
+.metro-shell.starting .tile-group+.tile-group{animation-delay:.38s}
+.metro-shell.starting .metro-header{animation:start-in .5s ease-out .2s both}
+@keyframes tiles-in{from{opacity:0;transform:translateX(12vw)}to{opacity:1;transform:none}}
