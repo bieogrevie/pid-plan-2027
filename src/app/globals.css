@@ -543,3 +543,26 @@ body,.metro-shell{font-family:var(--font-body),Arial,sans-serif;font-weight:500}
 .cost-popup-note{margin:14px 0 0;font-size:clamp(11px,.85vw,15px);font-style:italic;color:#6b7684}
 @keyframes popup-fade{from{opacity:0}to{opacity:1}}
 @keyframes popup-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+/* Halaman dengan gambar pendukung di kanan (mis. screenshot aplikasi NOC). */
+.detail-with-image{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(16px,2vw,40px);align-items:center}
+.detail-with-image .detail-items{--cols:3!important}
+.detail-image{margin:0;display:flex;flex-direction:column;gap:8px}
+.detail-image img{width:100%;height:auto;display:block;border:1px solid rgba(0,0,0,.08);box-shadow:0 14px 34px rgba(0,0,0,.14);background:#fff}
+.detail-image figcaption{font-size:clamp(11px,.85vw,15px);color:var(--muted,#566474)}
+@media(max-width:850px){.detail-with-image{grid-template-columns:1fr}}
+
+/* Halaman fill 5–6 kartu tanpa contoh kasus (mis. Kesenjangan Operasional): kartu lega, huruf diperbesar. */
+.detail-content.fill .detail-items:has(> :nth-child(5)):not(:has(> :nth-child(7))):not(:has(.detail-example)) .detail-value{font-size:clamp(13px,1vw,19px)}
+.detail-content.fill .detail-items:has(> :nth-child(5)):not(:has(> :nth-child(7))):not(:has(.detail-example)) h3{font-size:clamp(17px,1.4vw,27px)}
+.detail-content.fill .detail-items:has(> :nth-child(5)):not(:has(> :nth-child(7))):not(:has(.detail-example)) .detail-points{font-size:clamp(13px,1.02vw,19px);gap:1vh;line-height:1.4}
+
+/* Panel analisa sempit di kolom ke-4 grid kartu, setinggi semua baris kartu. */
+.device-groups.has-aside{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(240px,.9fr)}
+.device-groups.has-aside>.detail-aside{grid-column:4;grid-row:1 / span 2}
+.detail-aside{display:flex;flex-direction:column;gap:clamp(6px,1.1vh,14px);padding:clamp(12px,1.1vw,22px);background:#fff;border-top:3px solid var(--tc,#5b3aa0);overflow:hidden;box-shadow:0 4px 16px color-mix(in srgb,var(--tc,#5b3aa0) 18%,transparent)}
+.detail-aside h3{margin:0;font-family:var(--font-display),sans-serif;font-size:clamp(14px,1.1vw,21px);color:var(--ink,#1c2633)}
+.detail-aside strong{display:block;font-size:clamp(12px,min(.98vw,1.7vh),18px);color:var(--accent,#5b3aa0)}
+.detail-aside p{margin:2px 0 0;font-size:clamp(11px,min(.88vw,1.55vh),16px);line-height:1.35;color:var(--muted,#566474)}
+.detail-aside small{margin-top:auto;font-size:clamp(10px,min(.76vw,1.35vh),14px);font-style:italic;color:var(--muted,#566474)}
+@media(max-width:900px){.device-groups.has-aside{grid-template-columns:1fr}.device-groups.has-aside>.detail-aside{grid-column:auto;grid-row:auto}}

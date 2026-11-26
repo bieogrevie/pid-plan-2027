@@ -5,6 +5,7 @@
 
 import noc from "./noc-data.json";
 import { screenStats as ss } from "./screen-issues";
+import nocDashboard from "../../public/noc-dashboard.webp";
 
 export type DetailItem = { value?: string; title?: string; text?: string; points?: string[]; example?: string; exampleLabel?: string };
 
@@ -32,6 +33,10 @@ export type DetailPage = {
   /** Baris ringkasan biaya di bawah kartu (mis. capex/opex setahun). */
   totals?: CostTotal[];
   note?: string;
+  /** Panel sempit setinggi halaman di sisi kanan (mis. analisa per perangkat). */
+  aside?: { title: string; items: { title: string; text: string }[]; note?: string };
+  /** Gambar pendukung di sisi kanan halaman (mis. screenshot aplikasi). */
+  image?: { src: string; alt: string; caption?: string };
   /** Kartu diregangkan mengisi tinggi halaman. */
   fill?: boolean;
   /** Sumber data di footer; default: NOC PID untuk halaman berchart. */
@@ -221,6 +226,17 @@ export const tiles: Tile[] = [
         lead: "Inventaris perangkat pendukung operasional.",
         layout: "stats",
         items: [
+          {
+            value: "1.192",
+            text: "Layar PID",
+            points: [
+              `${ss.total} rusak tercatat (${(ss.total / 1192 * 100).toFixed(1).replace(".", ",")}%)`,
+              `${ss.byIssue.off} mati`,
+              `${ss.byIssue.bergaris} bergaris`,
+              `${ss.byIssue.redup} redup`,
+              `${ss.byIssue.kosong} tanpa keterangan`,
+            ],
+          },
           { value: "31", text: "ITA PC" },
           { value: "31", text: "CCTV Recorder" },
           { value: "412", text: "IP CCTV" },
@@ -237,13 +253,14 @@ export const tiles: Tile[] = [
           { value: "05.00–14.00", title: "Shift pagi", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
           { value: "14.00–22.00", title: "Shift sore", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
           { value: "21.00–05.00", title: "Shift malam", text: "4 kru; mobilitas dan perawatan di depo." },
-          { value: "2 orang", title: "NOC", text: "Pemantauan dan penerbitan tiket; jadwal NOC belum dikonfirmasi." },
+          { value: "2 orang", title: "NOC", text: "Pemantauan dan penerbitan tiket; jadwal 24 jam, 5 hari kerja." },
         ],
       },
       {
         title: "Alur Kerja Saat Ini",
         lead: "Alur penanganan gangguan PID saat ini.",
         layout: "steps",
+        image: { src: nocDashboard.src, alt: "Tampilan NOC Dashboard: statistik perangkat online dan down per jenis", caption: "Aplikasi NOC PID saat ini: status perangkat dari ping otomatis" },
         items: [
           { value: "01", title: "Deteksi sistem", text: `Sistem NOC PID melakukan ping otomatis ke perangkat tiap ${pr.pingIntervalMinutes} menit.` },
           { value: "02", title: "Temuan lapangan", text: "Laporan dari kru atau klien dicatat terpisah di luar sistem NOC (spreadsheet)." },
@@ -326,6 +343,16 @@ export const tiles: Tile[] = [
       {
         title: "Perangkat Paling Sering Bermasalah",
         lead: "Tiga perangkat dengan insiden terbanyak per jenis; kandidat perawatan preventif dan penggantian aset.",
+        aside: {
+          title: "Analisa: kenapa sering mati",
+          items: [
+            { title: "IP CCTV, AWK, IADEA", text: "KRL-141 gerbong 4: ketiganya mati bersamaan (±75 kali, ±594 jam). Satu sumber masalah per gerbong (daya atau jaringan lewat AWK), bukan tiga perangkat rusak." },
+            { title: "Putus-sambung", text: "±80% insiden pulih sendiri: koneksi atau daya putus sementara, bukan rusak permanen." },
+            { title: "ITA PC & MikroTik", text: "Mati bersamaan di KRL-69 dan KRL-120 gerbong 10. Indikasi catu daya atau kabel panel kabin; >55% butuh tim." },
+            { title: "CCTV Recorder", text: "Rata-rata 91 jam hingga selesai, 68% butuh tim. Indikasi kerusakan HDD/recorder dan menunggu suku cadang." },
+          ],
+          note: "Hipotesis dari pola data NOC Mei–Okt 2026; perlu dicek di lapangan.",
+        },
         charts: [{
           kind: "groups",
           title: "Tiga perangkat teratas per jenis",
@@ -428,7 +455,7 @@ export const tiles: Tile[] = [
           { value: "Bobot 10%", title: "Dokumentasi", points: ["Catatan penyelesaian teknisi dianggap lengkap jika minimal 2 kata"], example: "Catatan \"Restart UPS\" lengkap, \"ok\" tidak. 72 dari 80 pekerjaan lengkap (90%) → 9 poin" },
           { value: "Bobot 5%", title: "Kendali tiket tertunda", points: ["Tiket berstatus tertunda lebih dari 24 jam mengurangi nilai"], example: "6 dari 120 tiket tertunda lebih dari 24 jam → 95% → 4,75 poin" },
         ],
-        note: `Total Teknisi A: 25 + 12 + 12 + 10,5 + 9 + 4,75 = 73, di bawah nilai lulus 80. Belum ideal: SLA dipatok 100%, ${mediumShare} tiket berprioritas sama, waktu tunggu kereta dan suku cadang ikut terhitung.`,
+        note: `Total Teknisi A: 25 + 12 + 12 + 10,5 + 9 + 4,75 = 73,25, di bawah nilai lulus 80. Belum ideal: SLA dipatok 100%, ${mediumShare} tiket berprioritas sama, waktu tunggu kereta dan suku cadang ikut terhitung.`,
         source: "Sumber: modul KPI Performance NOC PID",
       },
       {
@@ -815,42 +842,41 @@ export const tiles: Tile[] = [
         items: [
           { value: "+2 teknisi", title: "Mobilitas & SDM", text: "Tambahan 2 teknisi dan penempatan teknisi tetap per depo." },
           { value: "+ Layanan AI", title: "Teknologi", text: "AI untuk peringatan dini, integrasi tiket, dan rekomendasi kebutuhan stok." },
-          { value: "+ Stok cadangan", title: "Sumber daya perawatan", text: "Ganti 67 layar PID rusak + stok cadangan 2% dari total setiap perangkat, ditambah barang habis pakai." },
+          { value: "+ Suku cadang", title: "Sumber daya perawatan", text: "Stok suku cadang: CCTV, NVR, switch, MikroTik, splitter HDMI, dan adaptor." },
           { value: "Tanpa biaya tambahan", title: "Tata kelola", text: "Persetujuan target internal, akses depo, dan tinjauan KPI bulanan." },
         ],
         totals: [
           {
             label: "Capex",
-            value: "± Rp1.175,6 jt",
-            text: "Ganti 67 layar rusak + cadangan 2% tiap perangkat",
+            value: "± Rp2.048,3 jt",
+            text: "Suku cadang: CCTV, NVR, switch, MikroTik, splitter, adaptor",
             detail: {
               definition: "Belanja modal: pembelian perangkat utuh yang dicatat sebagai aset, dipasang di kereta dan dipakai lebih dari 1 tahun. Nilainya disusutkan, bukan langsung menjadi biaya.",
               rows: [
-                { label: "Layar PID 28\"", sub: "67 rusak (daftar kendala) + 24 cadangan (2% × 1.192) = 91 unit × ±Rp10 jt", value: "Rp910 jt" },
-                { label: "AWK", sub: "8 unit (2% × 355) × ±Rp20 jt", value: "Rp160 jt" },
-                { label: "IP CCTV", sub: "9 unit (2% × 412) × ±Rp5 jt", value: "Rp45 jt" },
-                { label: "IADEA", sub: "5 unit (2% × 206) × ±Rp6,4 jt", value: "Rp32 jt" },
-                { label: "ITA PC", sub: "1 unit (2% × 31) × ±Rp15 jt", value: "Rp15 jt" },
-                { label: "CCTV Recorder", sub: "1 unit (2% × 31) × ±Rp12 jt", value: "Rp12 jt" },
-                { label: "MikroTik", sub: "1 unit (2% × 31) × ±Rp1,6 jt", value: "Rp1,6 jt" },
-                { label: "Total capex", value: "Rp1.175,6 jt", total: true },
+                { label: "CCTV", sub: "Vport P06-MP-M12-CAM36 · 50 pcs × Rp22.995.057", value: "Rp1.149.752.850" },
+                { label: "NVR", sub: "V2616A · 10 pcs × Rp80.000.000", value: "Rp800.000.000" },
+                { label: "Switch Dahua", sub: "DH-CS4010-8ET-60 · 50 pcs × Rp1.050.000", value: "Rp52.500.000" },
+                { label: "Splitter HDMI", sub: "Gain Tech 2 port · 50 pcs × Rp495.000", value: "Rp24.750.000" },
+                { label: "MikroTik", sub: "RB450Gx · 10 pcs × Rp1.875.000", value: "Rp18.750.000" },
+                { label: "Adaptor MikroTik", sub: "Adaptor 24V · 50 pcs × Rp25.000", value: "Rp1.250.000" },
+                { label: "Adaptor Ubiquiti", sub: "Adaptor 24V 0,5A · 50 pcs × Rp25.000", value: "Rp1.250.000" },
+                { label: "Total capex", value: "Rp2.048.252.850", total: true },
               ],
-              note: "Stok cadangan disiapkan 2% dari total setiap perangkat, dibulatkan ke atas. Harga pasar, perlu penawaran vendor; harga ITA PC dan CCTV Recorder masih asumsi.",
+              note: "Jenis, harga, dan jumlah dari daftar kebutuhan suku cadang; belum termasuk pajak dan ongkos kirim.",
             },
           },
           {
             label: "Opex per tahun",
-            value: "± Rp151,5 jt",
-            text: "Gaji Rp96 jt + AI Rp5,52 jt + habis pakai Rp50 jt",
+            value: "± Rp101,5 jt",
+            text: "Gaji Rp96 jt + AI Rp5,52 jt",
             detail: {
               definition: "Biaya operasional: pengeluaran rutin yang habis dalam tahun berjalan dan langsung dicatat sebagai biaya.",
               rows: [
-                { label: "Gaji 2 teknisi", sub: "Rp4.000.000 × 2 orang × 12 bulan, gaji bersih", value: "Rp96 jt" },
-                { label: "Token AI", sub: "US$25 × kurs Rp18.400 × 12 bulan", value: "Rp5,52 jt" },
-                { label: "Barang habis pakai", sub: "Adaptor, kabel, konektor RJ45/M12, HDD recorder", value: "Rp50 jt" },
-                { label: "Total opex", value: "Rp151,5 jt", total: true },
+                { label: "Gaji 2 teknisi", sub: "Rp4.000.000 × 2 orang × 12 bulan, gaji bersih", value: "Rp96.000.000" },
+                { label: "Token AI", sub: "US$25 × kurs Rp18.400 × 12 bulan", value: "Rp5.520.000" },
+                { label: "Total opex", value: "Rp101.520.000", total: true },
               ],
-              note: "Rp50 jt barang habis pakai adalah alokasi; rincian per item menyusul karena data NOC belum mencatat komponen yang diganti.",
+              note: "Biaya rutin di luar pembelian suku cadang.",
             },
           },
           {
@@ -858,33 +884,33 @@ export const tiles: Tile[] = [
             value: "± Rp101,5 jt",
             text: "Gaji + AI saja; ±Rp8,5 jt per bulan",
             detail: {
-              definition: "Pengeluaran minimum bila tidak membeli stok perangkat maupun barang habis pakai.",
+              definition: "Pengeluaran minimum bila tidak membeli suku cadang.",
               rows: [
-                { label: "Gaji 2 teknisi", value: "Rp96 jt" },
-                { label: "Token AI", value: "Rp5,52 jt" },
-                { label: "Total per tahun", value: "Rp101,5 jt", total: true },
-                { label: "Rata-rata per bulan", value: "Rp8,5 jt" },
+                { label: "Gaji 2 teknisi", value: "Rp96.000.000" },
+                { label: "Token AI", value: "Rp5.520.000" },
+                { label: "Total per tahun", value: "Rp101.520.000", total: true },
+                { label: "Rata-rata per bulan", value: "Rp8.460.000" },
               ],
               note: "Tanpa stok, perbaikan tetap bergantung pada suku cadang yang tersedia saat ini.",
             },
           },
           {
             label: "Total dengan stok",
-            value: "± Rp1.327,1 jt",
+            value: "± Rp2.149,8 jt",
             text: "Capex + opex dalam 1 tahun",
             main: true,
             detail: {
               definition: "Seluruh dana yang keluar dalam 1 tahun untuk perbaikan dan penyesuaian.",
               rows: [
-                { label: "Capex", sub: "Ganti layar rusak + cadangan 2% tiap perangkat", value: "Rp1.175,6 jt" },
-                { label: "Opex", sub: "Gaji, token AI, barang habis pakai", value: "Rp151,5 jt" },
-                { label: "Total per tahun", value: "Rp1.327,1 jt", total: true },
+                { label: "Capex", sub: "Suku cadang termasuk adaptor", value: "Rp2.048.252.850" },
+                { label: "Opex", sub: "Gaji dan token AI", value: "Rp101.520.000" },
+                { label: "Total per tahun", value: "Rp2.149.772.850", total: true },
               ],
               note: "Belum termasuk pajak dan ongkos kirim; kurs Rp18.400/US$ (26 Nov 2026).",
             },
           },
         ],
-        note: "Stok cadangan 2% dari total setiap perangkat. Asumsi: gaji teknisi Rp4 jt/bulan bersih; kurs Rp18.400/US$; harga pasar online, perlu penawaran vendor; belum termasuk pajak dan ongkir.",
+        note: "Suku cadang dari daftar kebutuhan (jenis, harga, jumlah). Asumsi: gaji teknisi Rp4 jt/bulan bersih; kurs Rp18.400/US$; belum termasuk pajak dan ongkir.",
       },
     ],
   },

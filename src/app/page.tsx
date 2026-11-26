@@ -75,7 +75,11 @@ function DetailBody({ page }: { page: DetailPage }) {
     </div>}
     {page.totals && <CostTotals totals={page.totals} />}
     {page.charts && <div className="detail-charts" style={{ "--cols": page.charts.length } as CSSProperties}>
-      {page.charts.map(chart => <ChartBlock key={chart.title} chart={chart} />)}
+      {page.charts.map((chart, i) => <ChartBlock key={chart.title} chart={chart} aside={i === 0 && page.aside ? <aside className="detail-aside">
+        <h3>{page.aside.title}</h3>
+        {page.aside.items.map(it => <div key={it.title}><strong>{it.title}</strong><p>{it.text}</p></div>)}
+        {page.aside.note && <small>{page.aside.note}</small>}
+      </aside> : undefined} />)}
     </div>}
   </>;
 }
@@ -465,7 +469,9 @@ export default function Home() {
       <div className={`detail-content ${page.charts ? "has-charts" : ""} ${page.charts && page.items ? "compact" : ""} ${page.fill ? "fill" : ""}`} key={`${open.tile}-${open.page}`}>
         <h2>{page.title}</h2>
         {page.lead && <p className="detail-lead">{page.lead}</p>}
-        <DetailBody page={page} />
+        {page.image
+          ? <div className="detail-with-image"><div><DetailBody page={page} /></div><figure className="detail-image"><img src={page.image.src} alt={page.image.alt} />{page.image.caption && <figcaption>{page.image.caption}</figcaption>}</figure></div>
+          : <DetailBody page={page} />}
         {page.note && <p className="detail-note">{page.note}</p>}
       </div>
       <footer className="detail-foot">

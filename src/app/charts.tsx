@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Chart } from "./content";
 
 // Grafik ringan berbasis SVG/HTML tanpa dependensi, warna mengikuti tema emas-putih.
@@ -91,8 +92,9 @@ function DonutChart({ chart }: { chart: Extract<Chart, { kind: "donut" }> }) {
   </div>;
 }
 
-function GroupsChart({ chart }: { chart: Extract<Chart, { kind: "groups" }> }) {
-  return <>{chart.legend && <Legend names={chart.legend} />}<div className="device-groups">
+// `aside` (opsional) jadi kolom ke-4 setinggi semua baris kartu.
+function GroupsChart({ chart, aside }: { chart: Extract<Chart, { kind: "groups" }>; aside?: ReactNode }) {
+  return <>{chart.legend && <Legend names={chart.legend} />}<div className={`device-groups ${aside ? "has-aside" : ""}`}>
     {chart.groups.map(g => {
       const max = Math.max(...g.rows.map(r => r.value), 1);
       return <section key={g.title} className="device-group">
@@ -104,15 +106,16 @@ function GroupsChart({ chart }: { chart: Extract<Chart, { kind: "groups" }> }) {
         </li>)}</ol>
       </section>;
     })}
+    {aside}
   </div></>;
 }
 
-export function ChartBlock({ chart }: { chart: Chart }) {
+export function ChartBlock({ chart, aside }: { chart: Chart; aside?: ReactNode }) {
   return <figure className={`chart chart-${chart.kind}`}>
     <figcaption>{chart.title}</figcaption>
     {chart.kind === "bar" && <BarChart chart={chart} />}
     {chart.kind === "hbar" && <HBarChart chart={chart} />}
     {chart.kind === "donut" && <DonutChart chart={chart} />}
-    {chart.kind === "groups" && <GroupsChart chart={chart} />}
+    {chart.kind === "groups" && <GroupsChart chart={chart} aside={aside} />}
   </figure>;
 }
