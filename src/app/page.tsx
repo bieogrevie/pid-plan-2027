@@ -376,7 +376,7 @@ export default function Home() {
       <div className="start-bottom">
         <div className="start-clock" suppressHydrationWarning>
           <strong>{now ? greeting(now) : "\u00a0"}</strong>
-          <span>{now ? now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "\u00a0"}</span>
+          <span>{now ? now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "\u00a0"}</span>
         </div>
         <button className="start-next" onClick={e => { e.stopPropagation(); enter(); }} aria-label="Masuk ke halaman utama">
           <span>Lanjut</span><Arrow />
