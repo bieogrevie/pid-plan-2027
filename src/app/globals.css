@@ -572,3 +572,7 @@ body,.metro-shell{font-family:var(--font-body),Arial,sans-serif;font-weight:500}
   .metro-shell{display:flex;flex-direction:column;padding-bottom:calc(3vh + clamp(40px,4.6vh,56px) + 1.6vh)}
   .metro-shell>.group-stage{flex:1 1 auto;height:auto;min-height:0;max-height:760px}
 }
+
+/* Nomor topik di pojok kiri atas tile home, sejajar dengan ikon di kanan. */
+.group-tile .group-tile-number{position:absolute;top:clamp(12px,1.3vw,24px);left:clamp(12px,1.3vw,24px);font-family:var(--font-display),sans-serif;font-weight:700;font-size:clamp(16px,1.5vw,28px);line-height:1;letter-spacing:.02em;color:rgba(255,255,255,.25)}
+.group-tile .group-tile-icon{opacity:.25}

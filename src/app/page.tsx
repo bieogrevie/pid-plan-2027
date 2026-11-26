@@ -389,6 +389,7 @@ export default function Home() {
     return <div key={tile.id} data-tile={index} className={`metro-tile group-tile flip-card tile-color-${index}`} role="button" tabIndex={0} aria-label={`${tile.title}. Klik untuk melihat detail.`} onClick={() => openTile(index)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTile(index); } }}>
       <div className="flip-inner">
         <div className="flip-face flip-front">
+          <span className="group-tile-number" aria-hidden="true">{tile.number}</span>
           <span className="group-tile-icon" aria-hidden="true">{tile.icon}</span>
           <strong>{tile.title}</strong>
           {tile.list
