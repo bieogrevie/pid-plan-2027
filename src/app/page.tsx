@@ -282,7 +282,8 @@ export default function Home() {
         else if (open) step(1);
         else if (intro === "done") openTile(0);
       } else if (command === "back") {
-        step(-1);
+        if (open) step(-1);
+        else if (intro === "done") setIntro("intro");
       }
     };
   }, [intro, enter, open, openTile, showThanks, step]);
@@ -391,6 +392,9 @@ export default function Home() {
       {renderGroup("Rencana Perbaikan", "ARAH PERBAIKAN TAHUN 2027", 3, 6)}
     </div>
 
+    {intro === "done" && !open && !showThanks && <button type="button" className="start-next greeting-link" onClick={() => setIntro("intro")} aria-label="Kembali ke layar sapaan">
+      <Arrow direction="left" /><span>Kembali</span>
+    </button>}
     {intro === "done" && !open && !showThanks && <button type="button" className="start-next closing-link" onClick={() => setShowThanks(true)} aria-label="Buka halaman penutup">
       <span>Penutup</span><Arrow />
     </button>}
