@@ -142,7 +142,7 @@ export const tiles: Tile[] = [
             points: [
               `2 personel NOC menerbitkan ±${manualPerPerson} tiket manual per orang per hari`,
               `${pr.technicians} teknisi terdaftar untuk 1.192 layar di 298 kereta`,
-              "Shift pagi/siang: 1 ketua tim + 2 PKL",
+              "Shift pagi/sore: 1 ketua tim + 2 PKL",
               "4 kru malam dengan 1 mobil untuk 8 depo",
             ],
           },
@@ -201,7 +201,7 @@ export const tiles: Tile[] = [
           { value: "298", title: "kereta", text: "Empat layar per kereta" },
           { value: "31", title: "rangkaian", text: "Cakupan armada" },
           { value: "8", title: "depo", text: "Lokasi perawatan" },
-          { value: "24", title: "jam", text: "Tiga shift operasional; akhir shift malam diasumsikan pukul 06.00" },
+          { value: "24", title: "jam", text: "Tiga shift operasional; mobilitas depo malam 21.00–05.00" },
           { value: "1", title: "mobil", text: "Kendaraan operasional kru malam" },
         ],
       },
@@ -223,9 +223,9 @@ export const tiles: Tile[] = [
         lead: "Alokasi personel per fungsi; bukan total jumlah personel.",
         layout: "cards",
         items: [
-          { value: "06.00–14.00", title: "Shift pagi", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
-          { value: "14.00–22.00", title: "Shift siang", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
-          { value: "22.00–06.00*", title: "Shift malam", text: "4 kru; perawatan di depo. *Akhir shift masih asumsi." },
+          { value: "05.00–14.00", title: "Shift pagi", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
+          { value: "14.00–22.00", title: "Shift sore", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
+          { value: "21.00–05.00", title: "Shift malam", text: "4 kru; mobilitas dan perawatan di depo." },
           { value: "2 orang", title: "NOC", text: "Pemantauan dan penerbitan tiket; jadwal NOC belum dikonfirmasi." },
         ],
       },
@@ -237,8 +237,8 @@ export const tiles: Tile[] = [
           { value: "01", title: "Deteksi sistem", text: `Sistem NOC PID melakukan ping otomatis ke perangkat tiap ${pr.pingIntervalMinutes} menit.` },
           { value: "02", title: "Temuan lapangan", text: "Laporan dari kru atau klien dicatat terpisah di luar sistem NOC (spreadsheet)." },
           { value: "03", title: "Penerbitan tiket", text: "NOC membuat tiket secara manual dan meneruskannya ke tim lapangan." },
-          { value: "04", title: "Penanganan shift pagi/siang", text: "Tim menangani di kereta sesuai akses dan waktu kereta berhenti." },
-          { value: "05", title: "Lanjut ke shift malam", text: "Jika tidak bisa ditangani shift pagi/siang, pekerjaan diteruskan ke kru malam di depo." },
+          { value: "04", title: "Penanganan shift pagi/sore", text: "Tim menangani di kereta sesuai akses dan waktu kereta berhenti." },
+          { value: "05", title: "Lanjut ke shift malam", text: "Jika tidak bisa ditangani shift pagi/sore, pekerjaan diteruskan ke kru malam di depo." },
           { value: "06", title: "Penyelesaian", text: "Tiket ditutup oleh tim setelah pekerjaan selesai, atau otomatis oleh sistem saat ping perangkat kembali normal." },
         ],
       },
@@ -372,7 +372,7 @@ export const tiles: Tile[] = [
             points: [
               "4 kru malam berbagi satu mobil untuk delapan depo",
               "Potensi cakupan hanya 1 depo per malam",
-              "Pekerjaan yang tidak selesai di shift pagi/siang menumpuk ke shift malam",
+              "Pekerjaan yang tidak selesai di shift pagi/sore menumpuk ke shift malam",
             ],
           },
           {
@@ -619,7 +619,7 @@ export const tiles: Tile[] = [
             value: "Saat ini",
             title: "Tim terpusat",
             points: [
-              "Shift pagi dan siang: masing-masing 1 ketua tim + 2 PKL",
+              "Shift pagi dan sore: masing-masing 1 ketua tim + 2 PKL",
               "Shift malam: 4 kru dengan 1 mobil untuk semua depo",
               "Hanya ±1 depo tertangani per malam; depo lain menunggu giliran",
             ],
@@ -649,7 +649,7 @@ export const tiles: Tile[] = [
             example: "2 teknisi baru agar keenam depo terisi",
           },
         ],
-        note: "Asumsi: shift siang serta cadangan cuti/libur belum dihitung dan perlu dikonfirmasi. Usulan diuji 1 bulan sebelum diterapkan penuh.",
+        note: "Asumsi: shift sore serta cadangan cuti/libur belum dihitung dan perlu dikonfirmasi. Usulan diuji 1 bulan sebelum diterapkan penuh.",
       },
       {
         title: "03 · Manajemen Perawatan Preventif",
