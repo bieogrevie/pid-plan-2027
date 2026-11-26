@@ -576,3 +576,17 @@ body,.metro-shell{font-family:var(--font-body),Arial,sans-serif;font-weight:500}
 /* Nomor topik di pojok kiri atas tile home, sejajar dengan ikon di kanan. */
 .group-tile .group-tile-number{position:absolute;top:clamp(12px,1.3vw,24px);left:clamp(12px,1.3vw,24px);font-family:var(--font-display),sans-serif;font-weight:700;font-size:clamp(16px,1.5vw,28px);line-height:1;letter-spacing:.02em;color:rgba(255,255,255,.25)}
 .group-tile .group-tile-icon{opacity:.25}
+
+/* Mobile/tablet sempit: tombol Kembali dan Penutup sebaris di bawah, konten tile diberi ruang di bawah nomor/ikon. */
+@media(max-width:900px){
+  .metro-shell{position:relative;padding-bottom:calc(24px + 44px + 16px)}
+  .metro-shell>.greeting-link,.metro-shell>.closing-link{position:absolute;margin:0;bottom:24px}
+  .metro-shell>.greeting-link{left:5vw;right:auto}
+  .metro-shell>.closing-link{right:5vw;left:auto}
+  .group-tile .flip-front{padding-top:clamp(40px,10vw,52px)}
+}
+@media(max-width:520px){
+  .group-tiles{grid-template-rows:repeat(2,210px)}
+  .metro-shell>.greeting-link{left:16px}
+  .metro-shell>.closing-link{right:16px}
+}
