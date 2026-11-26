@@ -1,0 +1,458 @@
+{
+  "generatedAt": "2026-11-26T02:52:36.269Z",
+  "source": "https://api-noc.sspace.web.id",
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-10-31"
+  },
+  "firstMonthWithData": "2026-05",
+  "totals": {
+    "total": 24467,
+    "resolved": 24437,
+    "open": 6,
+    "pending": 24,
+    "resolvedBySystem": 18775,
+    "resolutionRate": 99.88
+  },
+  "monthly": [
+    {
+      "month": "2026-01",
+      "label": "Jan",
+      "total": 0,
+      "resolved": 0,
+      "bySystem": 0
+    },
+    {
+      "month": "2026-02",
+      "label": "Feb",
+      "total": 0,
+      "resolved": 0,
+      "bySystem": 0
+    },
+    {
+      "month": "2026-03",
+      "label": "Mar",
+      "total": 0,
+      "resolved": 0,
+      "bySystem": 0
+    },
+    {
+      "month": "2026-04",
+      "label": "Apr",
+      "total": 0,
+      "resolved": 0,
+      "bySystem": 0
+    },
+    {
+      "month": "2026-05",
+      "label": "Mei",
+      "total": 2254,
+      "resolved": 2254,
+      "bySystem": 1903
+    },
+    {
+      "month": "2026-06",
+      "label": "Jun",
+      "total": 502,
+      "resolved": 502,
+      "bySystem": 397
+    },
+    {
+      "month": "2026-07",
+      "label": "Jul",
+      "total": 5964,
+      "resolved": 5955,
+      "bySystem": 5103
+    },
+    {
+      "month": "2026-08",
+      "label": "Agu",
+      "total": 5100,
+      "resolved": 5100,
+      "bySystem": 4203
+    },
+    {
+      "month": "2026-09",
+      "label": "Sep",
+      "total": 5315,
+      "resolved": 5307,
+      "bySystem": 3820
+    },
+    {
+      "month": "2026-10",
+      "label": "Okt",
+      "total": 5332,
+      "resolved": 5319,
+      "bySystem": 3349
+    }
+  ],
+  "ticketSource": {
+    "system": 882,
+    "noc": 23174,
+    "other": 409
+  },
+  "byType": [
+    {
+      "type": "IP CCTV",
+      "inventory": 412,
+      "incidents": 9382,
+      "bySystem": 7397,
+      "byMaintenance": 1972,
+      "devicesAffected": 374,
+      "recurringDevices": 374,
+      "avgResolveHours": 14.5,
+      "top": [
+        {
+          "name": "IP CCTV 1",
+          "krl": "krl-141",
+          "gerbong": 4,
+          "count": 76,
+          "bySystem": 67,
+          "byMaintenance": 9
+        },
+        {
+          "name": "IP CCTV 2",
+          "krl": "krl-141",
+          "gerbong": 4,
+          "count": 74,
+          "bySystem": 65,
+          "byMaintenance": 9
+        },
+        {
+          "name": "IP CCTV 1",
+          "krl": "krl-141",
+          "gerbong": 5,
+          "count": 70,
+          "bySystem": 60,
+          "byMaintenance": 10
+        }
+      ]
+    },
+    {
+      "type": "AWK",
+      "inventory": 355,
+      "incidents": 8505,
+      "bySystem": 6823,
+      "byMaintenance": 1673,
+      "devicesAffected": 325,
+      "recurringDevices": 325,
+      "avgResolveHours": 12.7,
+      "top": [
+        {
+          "name": "AWK 5232 - 1",
+          "krl": "krl-62",
+          "gerbong": 3,
+          "count": 85,
+          "bySystem": 72,
+          "byMaintenance": 13
+        },
+        {
+          "name": "AWK 5232 - 1",
+          "krl": "krl-141",
+          "gerbong": 4,
+          "count": 75,
+          "bySystem": 66,
+          "byMaintenance": 9
+        },
+        {
+          "name": "AWK 5232 - 1",
+          "krl": "krl-141",
+          "gerbong": 6,
+          "count": 71,
+          "bySystem": 59,
+          "byMaintenance": 12
+        }
+      ]
+    },
+    {
+      "type": "IADEA",
+      "inventory": 206,
+      "incidents": 4999,
+      "bySystem": 3901,
+      "byMaintenance": 1094,
+      "devicesAffected": 190,
+      "recurringDevices": 190,
+      "avgResolveHours": 11.4,
+      "top": [
+        {
+          "name": "IADEA 1",
+          "krl": "krl-141",
+          "gerbong": 4,
+          "count": 75,
+          "bySystem": 66,
+          "byMaintenance": 9
+        },
+        {
+          "name": "IADEA 1",
+          "krl": "krl-141",
+          "gerbong": 5,
+          "count": 69,
+          "bySystem": 58,
+          "byMaintenance": 11
+        },
+        {
+          "name": "IADEA 1",
+          "krl": "krl-141",
+          "gerbong": 6,
+          "count": 67,
+          "bySystem": 54,
+          "byMaintenance": 13
+        }
+      ]
+    },
+    {
+      "type": "ITA PC",
+      "inventory": 31,
+      "incidents": 619,
+      "bySystem": 270,
+      "byMaintenance": 349,
+      "devicesAffected": 30,
+      "recurringDevices": 30,
+      "avgResolveHours": 7.4,
+      "top": [
+        {
+          "name": "ITA PC",
+          "krl": "krl-69",
+          "gerbong": 10,
+          "count": 59,
+          "bySystem": 29,
+          "byMaintenance": 30
+        },
+        {
+          "name": "ITA PC",
+          "krl": "krl-120",
+          "gerbong": 10,
+          "count": 50,
+          "bySystem": 21,
+          "byMaintenance": 29
+        },
+        {
+          "name": "ITA PC",
+          "krl": "krl-15",
+          "gerbong": 10,
+          "count": 49,
+          "bySystem": 9,
+          "byMaintenance": 40
+        }
+      ]
+    },
+    {
+      "type": "MikroTik",
+      "inventory": 31,
+      "incidents": 550,
+      "bySystem": 245,
+      "byMaintenance": 305,
+      "devicesAffected": 30,
+      "recurringDevices": 30,
+      "avgResolveHours": 7.4,
+      "top": [
+        {
+          "name": "Mikrotik",
+          "krl": "krl-69",
+          "gerbong": 10,
+          "count": 58,
+          "bySystem": 28,
+          "byMaintenance": 30
+        },
+        {
+          "name": "Mikrotik",
+          "krl": "krl-120",
+          "gerbong": 10,
+          "count": 49,
+          "bySystem": 21,
+          "byMaintenance": 28
+        },
+        {
+          "name": "Mikrotik",
+          "krl": "krl-74",
+          "gerbong": 8,
+          "count": 30,
+          "bySystem": 7,
+          "byMaintenance": 23
+        }
+      ]
+    },
+    {
+      "type": "CCTV Recorder",
+      "inventory": 31,
+      "incidents": 386,
+      "bySystem": 118,
+      "byMaintenance": 264,
+      "devicesAffected": 29,
+      "recurringDevices": 29,
+      "avgResolveHours": 91.4,
+      "top": [
+        {
+          "name": "CCTV Recorder",
+          "krl": "krl-74",
+          "gerbong": 8,
+          "count": 31,
+          "bySystem": 15,
+          "byMaintenance": 16
+        },
+        {
+          "name": "CCTV Recorder",
+          "krl": "krl-69",
+          "gerbong": 10,
+          "count": 28,
+          "bySystem": 0,
+          "byMaintenance": 28
+        },
+        {
+          "name": "CCTV Recorder",
+          "krl": "krl-99",
+          "gerbong": 10,
+          "count": 24,
+          "bySystem": 13,
+          "byMaintenance": 11
+        }
+      ]
+    },
+    {
+      "type": "TN SWITCH",
+      "inventory": null,
+      "incidents": 20,
+      "bySystem": 18,
+      "byMaintenance": 2,
+      "devicesAffected": 20,
+      "recurringDevices": 0,
+      "avgResolveHours": 1.7,
+      "top": [
+        {
+          "name": "TN Switch",
+          "krl": "krl-74",
+          "gerbong": 6,
+          "count": 1,
+          "bySystem": 1,
+          "byMaintenance": 0
+        },
+        {
+          "name": "TN Switch",
+          "krl": "krl-74",
+          "gerbong": 7,
+          "count": 1,
+          "bySystem": 1,
+          "byMaintenance": 0
+        },
+        {
+          "name": "TN Switch",
+          "krl": "krl-74",
+          "gerbong": 8,
+          "count": 1,
+          "bySystem": 1,
+          "byMaintenance": 0
+        }
+      ]
+    },
+    {
+      "type": "LAINNYA",
+      "inventory": null,
+      "incidents": 6,
+      "bySystem": 3,
+      "byMaintenance": 3,
+      "devicesAffected": 1,
+      "recurringDevices": 1,
+      "avgResolveHours": 182.4,
+      "top": [
+        {
+          "count": 6,
+          "bySystem": 3,
+          "byMaintenance": 3
+        }
+      ]
+    }
+  ],
+  "process": {
+    "priority": {
+      "MEDIUM": 24465,
+      "LOW": 2
+    },
+    "assigned": 5709,
+    "ticketsPerDay": 133,
+    "technicians": 9,
+    "pingIntervalMinutes": 1
+  },
+  "topDown": [
+    {
+      "name": "AWK 5232 - 1",
+      "krl": "krl-62",
+      "gerbong": 3,
+      "downCount": 85,
+      "downtimeHours": 287
+    },
+    {
+      "name": "IP CCTV 1",
+      "krl": "krl-141",
+      "gerbong": 4,
+      "downCount": 76,
+      "downtimeHours": 592
+    },
+    {
+      "name": "AWK 5232 - 1",
+      "krl": "krl-141",
+      "gerbong": 4,
+      "downCount": 75,
+      "downtimeHours": 594
+    },
+    {
+      "name": "IADEA 1",
+      "krl": "krl-141",
+      "gerbong": 4,
+      "downCount": 75,
+      "downtimeHours": 594
+    },
+    {
+      "name": "IP CCTV 2",
+      "krl": "krl-141",
+      "gerbong": 4,
+      "downCount": 74,
+      "downtimeHours": 592
+    },
+    {
+      "name": "AWK 5232 - 1",
+      "krl": "krl-141",
+      "gerbong": 6,
+      "downCount": 71,
+      "downtimeHours": 392
+    },
+    {
+      "name": "IP CCTV 1",
+      "krl": "krl-141",
+      "gerbong": 5,
+      "downCount": 70,
+      "downtimeHours": 554
+    },
+    {
+      "name": "IADEA 1",
+      "krl": "krl-141",
+      "gerbong": 5,
+      "downCount": 69,
+      "downtimeHours": 650
+    },
+    {
+      "name": "AWK 5232 - 2",
+      "krl": "krl-141",
+      "gerbong": 6,
+      "downCount": 69,
+      "downtimeHours": 395
+    },
+    {
+      "name": "IP CCTV 1",
+      "krl": "krl-141",
+      "gerbong": 6,
+      "downCount": 69,
+      "downtimeHours": 387
+    }
+  ],
+  "deviceStatus": {
+    "total": 1066,
+    "online": 705,
+    "offline": 361,
+    "uptime": 66
+  },
+  "devices": {
+    "total": 1243,
+    "active": 1066,
+    "inactive": 177
+  }
+}

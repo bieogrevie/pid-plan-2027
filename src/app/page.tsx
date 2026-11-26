@@ -1,67 +1,144 @@
 "use client";
 
-import { useState } from "react";
-
-const slides = [
-  {
-    id: "overview", number: "", eyebrow: "EXISTING", title: "Inventaris perangkat",
-    summary: "Jumlah rangkaian, gerbong, dan perangkat yang terpasang.",
-    detail: "Daftar inventaris perangkat untuk mendukung pemetaan kebutuhan maintenance. Jumlah gerbong masih berupa placeholder dan dapat diperbarui setelah data final tersedia.",
-    chips: ["Data terpisah", "Update manual", "Sulit ditelusuri"], metric: "01", metricLabel: "KONDISI EXISTING",
-  },
-  {
-    id: "network", number: "02", eyebrow: "EXISTING", title: "Perawatan cenderung reaktif",
-    summary: "Tindak lanjut sering dimulai setelah laporan gangguan diterima.",
-    detail: "Contoh ini menggambarkan proses yang masih menunggu laporan gangguan sebelum tindakan dilakukan. Jadwal inspeksi dan prioritas risiko belum terlihat dalam satu alur kerja.",
-    chips: ["Menunggu laporan", "Prioritas belum jelas", "Risiko downtime"], metric: "02", metricLabel: "KONDISI EXISTING",
-  },
-  {
-    id: "audience", number: "03", eyebrow: "EXISTING", title: "Pelaporan belum terintegrasi",
-    summary: "Status pekerjaan dan biaya sulit dipantau lintas tim.",
-    detail: "Contoh dummy: progres pekerjaan, kebutuhan suku cadang, dan biaya perawatan dicatat pada laporan berbeda. Dampaknya, pemantauan membutuhkan rekap manual.",
-    chips: ["Rekap manual", "Status terlambat", "Data terfragmentasi"], metric: "03", metricLabel: "KONDISI EXISTING",
-  },
-  {
-    id: "formats", number: "04", eyebrow: "IMPROVEMENT", title: "Satu sumber data aset",
-    summary: "Satukan profil aset, lokasi, jadwal, dan riwayat perawatan.",
-    detail: "Bangun master data aset sebagai dasar pemantauan. Setiap aset memiliki identitas, lokasi, kondisi, dokumen, dan riwayat pekerjaan yang dapat ditelusuri.",
-    chips: ["Master data", "Riwayat aset", "Akses terpusat"], metric: "01", metricLabel: "ARAH IMPROVEMENT",
-  },
-  {
-    id: "packages", number: "05", eyebrow: "IMPROVEMENT", title: "Perawatan preventif terjadwal",
-    summary: "Gunakan kalender inspeksi dan pengingat berdasarkan kondisi aset.",
-    detail: "Rencanakan inspeksi berkala, tetapkan prioritas berdasarkan risiko, dan kirim pengingat sebelum jadwal jatuh tempo. Hasil inspeksi langsung tersimpan pada riwayat aset.",
-    chips: ["Preventive schedule", "Reminder", "Prioritas risiko"], metric: "02", metricLabel: "ARAH IMPROVEMENT",
-  },
-  {
-    id: "measurement", number: "06", eyebrow: "IMPROVEMENT", title: "Dashboard kinerja perawatan",
-    summary: "Pantau progres, downtime, biaya, dan kepatuhan jadwal.",
-    detail: "Dashboard menyajikan status pekerjaan dan indikator perawatan dalam satu tampilan. Metrik dan target perlu disepakati berdasarkan data operasional aktual.",
-    chips: ["Status pekerjaan", "Downtime", "Biaya & KPI"], metric: "03", metricLabel: "ARAH IMPROVEMENT",
-  },
-];
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { nocSnapshot, tiles, type DetailPage } from "./content";
+import { ChartBlock } from "./charts";
 
 function Arrow({ direction = "right" }: { direction?: "right" | "left" }) {
   return <svg aria-hidden="true" viewBox="0 0 20 20" className={direction === "left" ? "arrow arrow-left" : "arrow"}><path d="M3.5 10h12M10 4.5l5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
+// Clip-path inset yang menutupi posisi tile di layar, dipakai sebagai titik awal/akhir animasi zoom.
+function tileClip(index: number) {
+  const el = document.querySelector<HTMLElement>(`[data-tile="${index}"]`);
+  if (!el) return "inset(0)";
+  const r = el.getBoundingClientRect();
+  return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px)`;
+}
+
+const columnsFor = (count: number) => (count <= 4 ? count : count % 3 === 0 ? 3 : 4);
+
+function DetailBody({ page }: { page: DetailPage }) {
+  return <>
+    {page.items && <div className={`detail-items layout-${page.layout ?? "cards"}`} style={{ "--cols": columnsFor(page.items.length) } as CSSProperties}>
+      {page.items.map((item, i) => <article key={i} className="detail-item">
+        {item.value && <span className="detail-value">{item.value}</span>}
+        {item.title && <h3>{item.title}</h3>}
+        {item.text && <p>{item.text}</p>}
+        {item.points && <ul className="detail-points">{item.points.map(pt => <li key={pt}>{pt}</li>)}</ul>}
+        {item.example && <div className="detail-example"><span>{item.exampleLabel ?? "Contoh kasus"}</span><p>{item.example}</p></div>}
+      </article>)}
+    </div>}
+    {page.charts && <div className="detail-charts" style={{ "--cols": page.charts.length } as CSSProperties}>
+      {page.charts.map(chart => <ChartBlock key={chart.title} chart={chart} />)}
+    </div>}
+  </>;
+}
+
 export default function Home() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [showDetail, setShowDetail] = useState(false);
-  const active = slides[activeIndex];
-  const go = (direction: number) => setActiveIndex((activeIndex + direction + slides.length) % slides.length);
+  const [open, setOpen] = useState<{ tile: number; page: number } | null>(null);
+  const [closing, setClosing] = useState(false);
+  const [clip, setClip] = useState("inset(0)");
+
   const toggleFullscreen = async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
     } catch {
       // Fullscreen can be blocked by browser permissions or an embedded preview.
-      // Keep the presentation usable without surfacing an unhandled rejection.
     }
   };
 
-  const openDetail = (index: number) => { setActiveIndex(index); setShowDetail(true); };
-  const renderGroup = (title: string, subtitle: string, startIndex: number, endIndex: number, colorClass: string) => <section className={`tile-group ${colorClass}`}><header className="group-heading"><span>{title}</span><small>{subtitle}</small></header><div className="group-tiles">{slides.slice(startIndex, endIndex).map((slide, offset) => { const index = startIndex + offset; const selected = activeIndex === index && showDetail; return index === 0 ? <div key={slide.id} className={`metro-tile group-tile flip-card tile-color-${index} ${selected ? "selected" : ""}`} role="button" tabIndex={0} aria-label="Inventaris perangkat. Arahkan kursor untuk melihat daftar perangkat." onClick={() => openDetail(index)} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openDetail(index); } }}><div className="flip-inner"><div className="flip-face flip-front"><span className="group-tile-icon device-icon" aria-hidden="true">▣</span><strong>{slide.title}</strong><small>Arahkan kursor untuk melihat data</small></div><div className="flip-face flip-back"><strong>{slide.title}</strong><table className="inventory-table"><tbody><tr><td>JUMLAH RANGKAIAN</td><td>31</td></tr><tr><td>JUMLAH GERBONG</td><td>XXX</td></tr><tr className="inventory-spacer"><td colSpan={2}></td></tr><tr className="key-row"><td>ITA PC</td><td>31</td></tr><tr><td>CCTV RECORDER</td><td>31</td></tr><tr className="key-row"><td>Ip CCTV</td><td>412</td></tr><tr><td>AWK</td><td>355</td></tr><tr className="key-row"><td>IADEA</td><td>206</td></tr><tr><td>MIKROTIK</td><td>31</td></tr></tbody></table></div></div></div> : <button key={slide.id} className={`metro-tile group-tile tile-color-${index} ${selected ? "selected" : ""}`} onClick={() => openDetail(index)} aria-pressed={selected}><span className="group-tile-number">{slide.number}</span><span className="group-tile-icon">{index < 3 ? ["▦", "⌁", "▤"][index] : ["▣", "◷", "◉"][index - 3]}</span><strong>{slide.title}</strong><small>{slide.summary}</small></button>; })}</div></section>;
+  const openTile = (index: number) => { setClip(tileClip(index)); setClosing(false); setOpen({ tile: index, page: 0 }); };
 
-  return <main className="metro-shell"><header className="metro-header"><h1>PID Maintenance Improvement Plan 2027</h1><button className="fullscreen-button" onClick={toggleFullscreen} aria-label="Tampilkan layar penuh" title="Layar penuh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></header><div className="group-stage" aria-label="PID Maintenance Improvement Plan 2027">{renderGroup("Existing", "KONDISI SAAT INI", 0, 3, "existing-group")}{renderGroup("Improvement", "ARAH PERBAIKAN", 3, 6, "improvement-group")}</div>{showDetail && <><button className="drawer-backdrop" onClick={() => setShowDetail(false)} aria-label="Tutup detail"/><aside className={`detail-drawer ${activeIndex < 3 ? "drawer-existing" : "drawer-improvement"}`} aria-live="polite"><button className="drawer-close" onClick={() => setShowDetail(false)} aria-label="Tutup detail">×</button><small>{active.eyebrow} · {active.number}</small><h2>{active.title}</h2><p>{active.detail}</p><div className="detail-tags">{active.chips.map(chip => <span key={chip}>{chip}</span>)}</div></aside></>}</main>;
+  const close = useCallback(() => {
+    if (!open) return;
+    setClip(tileClip(open.tile));
+    setClosing(true);
+    window.setTimeout(() => { setOpen(null); setClosing(false); }, 380);
+  }, [open]);
+
+  // Navigasi antarhalaman dalam satu tile; lewat halaman terakhir (atau sebelum pertama) kembali ke home.
+  const step = useCallback((dir: number) => {
+    if (!open) return;
+    const next = open.page + dir;
+    if (next >= 0 && next < tiles[open.tile].pages.length) setOpen({ ...open, page: next });
+    else close();
+  }, [open, close]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); step(1); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); step(-1); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, close, step]);
+
+  // Semua tile: muka depan = judul, saat hover bergeser ke ringkasan angka kunci.
+  const renderTile = (index: number) => {
+    const tile = tiles[index];
+    return <div key={tile.id} data-tile={index} className={`metro-tile group-tile flip-card tile-color-${index}`} role="button" tabIndex={0} aria-label={`${tile.title}. Klik untuk melihat detail.`} onClick={() => openTile(index)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTile(index); } }}>
+      <div className="flip-inner">
+        <div className="flip-face flip-front">
+          <span className="group-tile-icon" aria-hidden="true">{tile.icon}</span>
+          <strong>{tile.title}</strong>
+          {tile.list
+            ? (() => { const List = tile.numbered ? "ol" : "ul"; return <List className={`summary-list ${tile.list.length > 5 ? "summary-columns" : ""} ${tile.numbered ? "numbered" : ""}`}>{tile.list.map(item => <li key={item}>{item}</li>)}</List>; })()
+            : tile.summary && (tile.summary.length > 1
+              ? <ul className="summary-points">{tile.summary.map(item => <li key={item}>{item}</li>)}</ul>
+              : <small>{tile.summary[0]}</small>)}
+        </div>
+        <div className="flip-face flip-back">
+          <strong>{tile.title}</strong>
+          <table className="inventory-table"><tbody>{tile.highlights.map(h => <tr key={h.label}><td>{h.label}</td><td>{h.value}</td></tr>)}</tbody></table>
+        </div>
+      </div>
+    </div>;
+  };
+
+  const renderGroup = (title: string, subtitle: string, start: number, end: number) => <section className="tile-group">
+    <header className="group-heading"><span>{title}</span><small>{subtitle}</small></header>
+    <div className="group-tiles">{Array.from({ length: end - start }, (_, i) => renderTile(start + i))}</div>
+  </section>;
+
+  const tile = open ? tiles[open.tile] : null;
+  const page = tile && open ? tile.pages[open.page] : null;
+
+  return <main className="metro-shell">
+    <header className="metro-header">
+      <div><small className="header-eyebrow">RENCANA STRATEGIS OPERASIONAL 2027 · PID / TV KERETA</small><h1>PID Maintenance Improvement Plan 2027</h1></div>
+      <button className="fullscreen-button" onClick={toggleFullscreen} aria-label="Tampilkan layar penuh" title="Layar penuh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+    </header>
+    <div className="group-stage" aria-label="PID Maintenance Improvement Plan 2027">
+      {renderGroup("Kondisi Saat Ini", "EVALUASI TAHUN 2026", 0, 3)}
+      {renderGroup("Rencana Perbaikan", "ARAH PERBAIKAN TAHUN 2027", 3, 6)}
+    </div>
+
+    {open && tile && page && <section className={`detail-page tile-color-${open.tile} ${closing ? "closing" : ""}`} style={{ "--clip-from": clip } as CSSProperties} role="dialog" aria-modal="true" aria-label={page.title}>
+      <header className="detail-head">
+        <small>{tile.section}</small>
+        <button className="detail-close" onClick={close} aria-label="Tutup detail">×</button>
+      </header>
+      <div className={`detail-content ${page.charts ? "has-charts" : ""} ${page.charts && page.items ? "compact" : ""} ${page.fill ? "fill" : ""}`} key={`${open.tile}-${open.page}`}>
+        <h2>{page.title}</h2>
+        {page.lead && <p className="detail-lead">{page.lead}</p>}
+        <DetailBody page={page} />
+        {page.note && <p className="detail-note">{page.note}</p>}
+      </div>
+      <footer className="detail-foot">
+        <span>{page.source ?? (page.charts ? nocSnapshot : "OPERASIONAL / RENCANA PERBAIKAN PERAWATAN PID 2027")}</span>
+        <div className="detail-dots" aria-hidden="true">{tile.pages.map((_, i) => <i key={i} className={i === open.page ? "on" : ""} />)}</div>
+        <div className="detail-nav">
+          <button onClick={() => step(-1)} aria-label="Sebelumnya"><Arrow direction="left" /></button>
+          <span>{tile.number} · {open.page + 1}/{tile.pages.length}</span>
+          {open.page === tile.pages.length - 1
+            ? <button onClick={() => step(1)} aria-label="Kembali ke halaman utama" title="Kembali ke halaman utama" className="nav-home">⌂</button>
+            : <button onClick={() => step(1)} aria-label="Berikutnya"><Arrow /></button>}
+        </div>
+      </footer>
+    </section>}
+  </main>;
 }
