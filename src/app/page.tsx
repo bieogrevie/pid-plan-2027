@@ -241,16 +241,13 @@ export default function Home() {
     window.setTimeout(() => { setOpen(null); setClosing(false); }, 380);
   }, [open, closing]);
 
-  // Navigasi detail kembali ke menu di batas topik, atau lanjut ke penutup di akhir topik terakhir.
+  // Navigasi detail selalu kembali ke home di batas topik; penutup hanya dibuka dari tombol Penutup di home.
   const step = useCallback((dir: number) => {
     if (!open || closing) return;
     if (dir > 0) ensureFullscreen();
     const next = open.page + dir;
     if (next >= 0 && next < tiles[open.tile].pages.length) setOpen({ ...open, page: next });
-    else if (dir > 0 && open.tile === tiles.length - 1) {
-      setOpen(null);
-      setShowThanks(true);
-    } else close();
+    else close();
   }, [open, close, closing]);
 
   useEffect(() => {
@@ -430,9 +427,7 @@ export default function Home() {
         <div className="detail-nav">
           <button onClick={() => step(-1)} aria-label="Kembali"><Arrow direction="left" /></button>
           <span>{tile.number} · {open.page + 1}/{tile.pages.length}</span>
-          {open.page === tile.pages.length - 1 && open.tile === tiles.length - 1
-            ? <button onClick={() => step(1)} aria-label="Buka halaman penutup" title="Penutup"><Arrow /></button>
-            : open.page === tile.pages.length - 1
+          {open.page === tile.pages.length - 1
             ? <button onClick={() => step(1)} aria-label="Kembali ke halaman utama" title="Kembali ke halaman utama" className="nav-home">⌂</button>
             : <button onClick={() => step(1)} aria-label="Lanjut"><Arrow /></button>}
         </div>
