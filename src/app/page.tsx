@@ -58,7 +58,7 @@ type Recognition = {
   abort: () => void;
 };
 
-const localVoiceOptions = { langs: ["en-US"], processLocally: true };
+const localVoiceOptions = { langs: ["id-ID"], processLocally: true };
 
 type RecognitionConstructor = {
   new (): Recognition;
@@ -116,7 +116,7 @@ export default function Home() {
     }
 
     const session = new SpeechRecognition();
-    session.lang = "en-US";
+    session.lang = localVoiceOptions.langs[0];
     session.continuous = true;
     if (localVoiceReady.current) session.processLocally = true;
     const fail = (message: string) => {
@@ -135,7 +135,7 @@ export default function Home() {
     };
 
     session.onaudiostart = () => {
-      if (recognition.current === session) setVoiceStatus("Mendengarkan · Next / Back");
+      if (recognition.current === session) setVoiceStatus("Mendengarkan · Lanjut / Kembali");
     };
     session.onresult = ({ resultIndex, results }) => {
       if (recognition.current !== session) return;
@@ -143,14 +143,14 @@ export default function Home() {
         const result = results[index];
         if (!result.isFinal) continue;
         const phrase = result[0].transcript.toLowerCase().replace(/[^a-z ]/g, "").trim().replace(/\s+/g, " ");
-        if (/^(next( slide| page)?|lanjut|berikutnya)$/.test(phrase)) {
+        if (/^(lanjut(kan| slide| halaman)?|berikutnya)$/.test(phrase)) {
           voiceCommand.current("next");
-          setVoiceStatus("Next · Mendengarkan");
-        } else if (/^(back|go back|previous( slide| page)?|kembali|sebelumnya)$/.test(phrase)) {
+          setVoiceStatus("Lanjut · Mendengarkan");
+        } else if (/^(kembali( ke slide sebelumnya)?|sebelumnya)$/.test(phrase)) {
           voiceCommand.current("back");
-          setVoiceStatus("Back · Mendengarkan");
+          setVoiceStatus("Kembali · Mendengarkan");
         } else if (phrase) {
-          setVoiceStatus(`Terdengar “${phrase.slice(0, 48)}” · Ucapkan Next atau Back`);
+          setVoiceStatus(`Terdengar “${phrase.slice(0, 48)}” · Ucapkan Lanjut atau Kembali`);
         }
       }
     };
@@ -317,7 +317,7 @@ export default function Home() {
     {(voiceError || voiceStatus) && <span className="voice-status" role="status">{voiceError || voiceStatus}
       {offerLocalVoice && <button type="button" className="local-voice-button" disabled={installingVoice} onClick={installLocalVoice}>{installingVoice ? "Mengunduh paket suara…" : "Aktifkan pengenalan lokal"}</button>}
     </span>}
-    <button type="button" className="fullscreen-button" onClick={toggleVoice} aria-pressed={Boolean(voiceStatus)} aria-label="Kontrol suara" title={voiceStatus ? 'Ucapkan “Next” atau “Back”. Klik untuk berhenti.' : "Aktifkan kontrol suara"}>
+    <button type="button" className="fullscreen-button" onClick={toggleVoice} aria-pressed={Boolean(voiceStatus)} aria-label="Kontrol suara" title={voiceStatus ? 'Ucapkan “Lanjut” atau “Kembali”. Klik untuk berhenti.' : "Aktifkan kontrol suara"}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3m-3 0h6"/></svg>
     </button>
     <button type="button" className="fullscreen-button" onClick={toggleFullscreen} aria-label="Ubah mode layar penuh" title="Layar penuh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
@@ -367,7 +367,7 @@ export default function Home() {
           <span>{now ? now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "\u00a0"}</span>
         </div>
         <button className="start-next" onClick={e => { e.stopPropagation(); enter(); }} aria-label="Masuk ke halaman utama">
-          <span>Next</span><Arrow />
+          <span>Lanjut</span><Arrow />
         </button>
       </div>
     </section>}
@@ -413,13 +413,13 @@ export default function Home() {
         <span>{page.source ?? (page.charts ? nocSnapshot : "OPERASIONAL / RENCANA PERBAIKAN PERAWATAN PID 2027")}</span>
         <div className="detail-dots" aria-hidden="true">{tile.pages.map((_, i) => <i key={i} className={i === open.page ? "on" : ""} />)}</div>
         <div className="detail-nav">
-          <button onClick={() => step(-1)} aria-label="Sebelumnya"><Arrow direction="left" /></button>
+          <button onClick={() => step(-1)} aria-label="Kembali"><Arrow direction="left" /></button>
           <span>{tile.number} · {open.page + 1}/{tile.pages.length}</span>
           {open.page === tile.pages.length - 1 && open.tile === tiles.length - 1
             ? <button onClick={() => step(1)} aria-label="Buka halaman penutup" title="Penutup"><Arrow /></button>
             : open.page === tile.pages.length - 1
             ? <button onClick={() => step(1)} aria-label="Kembali ke halaman utama" title="Kembali ke halaman utama" className="nav-home">⌂</button>
-            : <button onClick={() => step(1)} aria-label="Berikutnya"><Arrow /></button>}
+            : <button onClick={() => step(1)} aria-label="Lanjut"><Arrow /></button>}
         </div>
       </footer>
     </section>}
