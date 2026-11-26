@@ -87,7 +87,7 @@ function DetailBody({ page }: { page: DetailPage }) {
 // Sapaan sesuai jam lokal perangkat (menggantikan jam di layar awal).
 const greeting = (d: Date) => {
   const h = d.getHours();
-  return h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : "Good Evening";
+  return h < 11 ? "Selamat Pagi" : h < 15 ? "Selamat Siang" : h < 18 ? "Selamat Sore" : "Selamat Malam";
 };
 
 type VoiceResult = {
