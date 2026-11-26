@@ -49,6 +49,7 @@ type VoiceResult = {
 type Recognition = {
   lang: string;
   continuous: boolean;
+  interimResults: boolean;
   processLocally?: boolean;
   onresult: ((event: VoiceResult) => void) | null;
   onaudiostart: (() => void) | null;
@@ -118,6 +119,7 @@ export default function Home() {
     const session = new SpeechRecognition();
     session.lang = localVoiceOptions.langs[0];
     session.continuous = true;
+    session.interimResults = true;
     if (localVoiceReady.current) session.processLocally = true;
     const fail = (message: string) => {
       recognition.current = null;
@@ -137,30 +139,34 @@ export default function Home() {
     session.onaudiostart = () => {
       if (recognition.current === session) setVoiceStatus("Mendengarkan · Lanjut / Kembali");
     };
+    // Perintah dieksekusi dari hasil sementara (interim) begitu kata "lanjut"/"kembali" terdengar,
+    // tanpa menunggu hasil final. Jumlah perintah yang sudah dijalankan dicatat per hasil
+    // agar kata yang sama tidak terpicu dua kali saat transkrip diperbarui.
+    const fired = new Map<number, number>();
     session.onresult = ({ resultIndex, results }) => {
       if (recognition.current !== session) return;
       for (let index = resultIndex; index < results.length; index++) {
-        const result = results[index];
-        if (!result.isFinal) continue;
-        const phrase = result[0].transcript.toLowerCase().replace(/[^a-z ]/g, "").trim().replace(/\s+/g, " ");
-        if (/^(lanjut(kan| slide| halaman)?|berikutnya)$/.test(phrase)) {
-          voiceCommand.current("next");
-          setVoiceStatus("Lanjut · Mendengarkan");
-        } else if (/^(kembali( ke slide sebelumnya)?|sebelumnya)$/.test(phrase)) {
-          voiceCommand.current("back");
-          setVoiceStatus("Kembali · Mendengarkan");
-        } else if (phrase) {
-          setVoiceStatus(`Terdengar “${phrase.slice(0, 48)}” · Ucapkan Lanjut atau Kembali`);
+        const phrase = results[index][0].transcript.toLowerCase().replace(/[^a-z ]/g, " ").trim();
+        const commands = phrase.split(/\s+/).flatMap((word) =>
+          word.startsWith("lanjut") ? ["next"] : word === "kembali" ? ["back"] : [],
+        );
+        const done = fired.get(index) ?? 0;
+        for (const command of commands.slice(done)) {
+          voiceCommand.current(command);
+          setVoiceStatus(command === "next" ? "Lanjut · Mendengarkan" : "Kembali · Mendengarkan");
         }
+        fired.set(index, Math.max(done, commands.length));
       }
     };
     session.onend = () => {
       if (recognition.current !== session) return;
-      setVoiceStatus("Menyambungkan ulang mikrofon…");
-      restartVoice.current = window.setTimeout(start, 400);
+      fired.clear();
+      start();
     };
     session.onerror = ({ error }) => {
-      if (recognition.current !== session || error === "no-speech") return;
+      if (recognition.current !== session) return;
+      // Gangguan sesaat: biarkan onend langsung menyambungkan ulang.
+      if (error === "no-speech" || error === "aborted") return;
       const messages: Record<string, string> = {
         "not-allowed": "Izinkan mikrofon di pengaturan situs. Jika dibuka lewat pratinjau, buka presentasi di tab browser.",
         "service-not-allowed": "Layanan pengenal suara diblokir oleh browser.",
