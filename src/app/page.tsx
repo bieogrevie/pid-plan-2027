@@ -147,13 +147,18 @@ export default function Home() {
       if (recognition.current !== session) return;
       for (let index = resultIndex; index < results.length; index++) {
         const phrase = results[index][0].transcript.toLowerCase().replace(/[^a-z ]/g, " ").trim();
+        // Pengenal suara sering menulis "kembali" sebagai "kembalikan", "gembali", "balik", dll.
         const commands = phrase.split(/\s+/).flatMap((word) =>
-          word.startsWith("lanjut") ? ["next"] : word === "kembali" ? ["back"] : [],
+          /^(lanjut|next)/.test(word) ? ["next"]
+            : /^(kemba|gemba|balik|mundur|back)/.test(word) ? ["back"] : [],
         );
         const done = fired.get(index) ?? 0;
         for (const command of commands.slice(done)) {
           voiceCommand.current(command);
           setVoiceStatus(command === "next" ? "Lanjut · Mendengarkan" : "Kembali · Mendengarkan");
+        }
+        if (commands.length <= done && phrase) {
+          setVoiceStatus(`Terdengar “${phrase.slice(0, 48)}” · Ucapkan Lanjut atau Kembali`);
         }
         fired.set(index, Math.max(done, commands.length));
       }
