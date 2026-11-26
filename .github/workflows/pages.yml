@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          PAGES_BASE_PATH: /presentasi-tv-kereta
+          PAGES_BASE_PATH: /${{ github.event.repository.name }}
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
