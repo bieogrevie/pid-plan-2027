@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { nocSnapshot, tiles, type DetailPage } from "./content";
+import { nocSnapshot, tiles, type CostTotal, type DetailPage } from "./content";
 import { ChartBlock } from "./charts";
 
 function Arrow({ direction = "right" }: { direction?: "right" | "left" }) {
@@ -16,7 +16,44 @@ function tileClip(index: number) {
   return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px)`;
 }
 
-const columnsFor = (count: number) => (count <= 4 ? count : count % 3 === 0 ? 3 : 4);
+// Poin berawalan kategori ("Sistem: …") diberi label berwarna yang sama di semua kartu.
+const pointTags = ["Sistem", "Stok", "Suku cadang", "SDM", "Operasional", "Aset", "Proses", "Layar"];
+const tagOf = (point: string) => pointTags.find(tag => point.startsWith(`${tag}:`));
+
+const columnsFor =(count: number) => (count <= 4 ? count : count % 3 === 0 ? 3 : 4);
+
+// Kartu ringkasan biaya; klik kartu membuka popup rincian. Selama popup terbuka,
+// atribut data-popup-open membuat navigasi slide (keyboard/suara) diabaikan.
+function CostTotals({ totals }: { totals: CostTotal[] }) {
+  const [active, setActive] = useState<CostTotal | null>(null);
+  const grid = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!active) return;
+    document.body.dataset.popupOpen = "true";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.preventDefault(); setActive(null); } };
+    window.addEventListener("keydown", onKey);
+    return () => { delete document.body.dataset.popupOpen; window.removeEventListener("keydown", onKey); };
+  }, [active]);
+  return <>
+    <div className="detail-totals" ref={grid}>
+      {totals.map(t => <button type="button" key={t.label} className={t.main ? "main" : undefined} onClick={() => t.detail && setActive(t)} aria-haspopup="dialog">
+        <span>{t.label}</span><strong>{t.value}</strong>{t.text && <small>{t.text}</small>}
+      </button>)}
+    </div>
+    {active?.detail && <div className="cost-popup-backdrop" onClick={() => setActive(null)}>
+      <div className="cost-popup" role="dialog" aria-modal="true" aria-labelledby="cost-popup-title" onClick={e => e.stopPropagation()}>
+        <button type="button" className="cost-popup-close" onClick={() => setActive(null)} aria-label="Tutup rincian" autoFocus>✕</button>
+        <span className="cost-popup-label">{active.label}</span>
+        <h3 id="cost-popup-title">{active.value}</h3>
+        <p className="cost-popup-def">{active.detail.definition}</p>
+        <table><tbody>{active.detail.rows.map(r => <tr key={r.label} className={r.total ? "total" : undefined}>
+          <td>{r.label}{r.sub && <small>{r.sub}</small>}</td><td>{r.value}</td>
+        </tr>)}</tbody></table>
+        {active.detail.note && <p className="cost-popup-note">{active.detail.note}</p>}
+      </div>
+    </div>}
+  </>;
+}
 
 function DetailBody({ page }: { page: DetailPage }) {
   return <>
@@ -25,10 +62,18 @@ function DetailBody({ page }: { page: DetailPage }) {
         {item.value && <span className="detail-value">{item.value}</span>}
         {item.title && <h3>{item.title}</h3>}
         {item.text && <p>{item.text}</p>}
-        {item.points && <ul className="detail-points">{item.points.map(pt => <li key={pt}>{pt}</li>)}</ul>}
+        {item.points && <ul className={`detail-points ${item.points.some(pt => tagOf(pt)) ? "tagged" : ""} ${item.points.some(pt => pt.includes("\n")) ? "two-line" : ""}`}>{item.points.map(pt => {
+          const tag = tagOf(pt);
+          const [head, ...rest] = pt.split("\n");
+          return <li key={pt} className={tag ? `point-tag-${tag.toLowerCase().replace(" ", "-")}` : undefined}>
+            {tag ? <><span className="point-tag">{tag}</span>{pt.slice(tag.length + 1).trim()}</>
+              : rest.length ? <><strong className="point-head">{head}</strong><span className="point-sub">{rest.join(" ")}</span></> : pt}
+          </li>;
+        })}</ul>}
         {item.example && <div className="detail-example"><span>{item.exampleLabel ?? "Contoh kasus"}</span><p>{item.example}</p></div>}
       </article>)}
     </div>}
+    {page.totals && <CostTotals totals={page.totals} />}
     {page.charts && <div className="detail-charts" style={{ "--cols": page.charts.length } as CSSProperties}>
       {page.charts.map(chart => <ChartBlock key={chart.title} chart={chart} />)}
     </div>}
@@ -253,6 +298,7 @@ export default function Home() {
   useEffect(() => {
     if (!open && !showThanks) return;
     const onKey = (e: KeyboardEvent) => {
+      if (document.body.dataset.popupOpen) return;
       if (showThanks) {
         if (e.key === "Escape" || e.key === "ArrowLeft" || e.key === "PageUp") {
           e.preventDefault();
@@ -270,6 +316,7 @@ export default function Home() {
 
   useEffect(() => {
     voiceCommand.current = (command) => {
+      if (document.body.dataset.popupOpen) return;
       if (showThanks) {
         if (command === "back") setShowThanks(false);
         return;

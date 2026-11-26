@@ -14,12 +14,23 @@ export type Chart =
   | { kind: "donut"; title: string; center: string; caption?: string; segments: { label: string; value: number }[] }
   | { kind: "groups"; title: string; legend?: string[]; groups: { title: string; meta: string; rows: { label: string; sub: string; value: number; parts?: number[] }[] }[] };
 
+/** Kartu ringkasan biaya; `detail` tampil sebagai popup saat kartu diklik. */
+export type CostTotal = {
+  label: string;
+  value: string;
+  text?: string;
+  main?: boolean;
+  detail?: { definition: string; rows: { label: string; sub?: string; value: string; total?: boolean }[]; note?: string };
+};
+
 export type DetailPage = {
   title: string;
   lead?: string;
   layout?: "stats" | "cards" | "steps";
   items?: DetailItem[];
   charts?: Chart[];
+  /** Baris ringkasan biaya di bawah kartu (mis. capex/opex setahun). */
+  totals?: CostTotal[];
   note?: string;
   /** Kartu diregangkan mengisi tinggi halaman. */
   fill?: boolean;
@@ -791,23 +802,89 @@ export const tiles: Tile[] = [
         lead: "Tahapan implementasi sepanjang 2027.",
         layout: "steps",
         items: [
-          { value: "Kuartal 1", title: "Membangun kendali", text: "Data dasar, SOP, uji coba mobilitas, perawatan preventif, dan kendali stok." },
-          { value: "Kuartal 2", title: "Implementasi", text: "Penerapan pemantauan, mobilitas, dan perawatan preventif berdasarkan hasil uji coba." },
-          { value: "Kuartal 3", title: "Optimalisasi", text: "Evaluasi kapasitas, keandalan, dan peremajaan aset prioritas." },
-          { value: "Kuartal 4", title: "Standardisasi", text: "Evaluasi KPI, audit kualitas, dan standardisasi proses." },
+          { value: "Kuartal 1", title: "Membangun kendali", text: "Data dasar, SOP, uji coba mobilitas, perawatan preventif, dan kendali stok.", points: ["Sistem: penyesuaian kategori dan prioritas tiket, data dasar layar per rangkaian", "Stok: inventarisasi suku cadang dan penetapan stok minimum per depo", "SDM: sosialisasi SOP dan jadwal uji coba mobilitas kru"] },
+          { value: "Kuartal 2", title: "Implementasi", text: "Penerapan pemantauan, mobilitas, dan perawatan preventif berdasarkan hasil uji coba.", points: ["Sistem: peringatan otomatis dan integrasi tiket ke NOC", "Stok: pengisian ulang sesuai stok minimum, pencatatan keluar-masuk barang", "Operasional: jadwal preventif berjalan di semua depo"] },
+          { value: "Kuartal 3", title: "Optimalisasi", text: "Evaluasi kapasitas, keandalan, dan peremajaan aset prioritas.", points: ["Sistem: penyesuaian ambang peringatan dari data gangguan berulang", "Stok: revisi stok minimum berdasarkan pemakaian nyata", "Aset: daftar perangkat prioritas untuk diganti"] },
+          { value: "Kuartal 4", title: "Standardisasi", text: "Evaluasi KPI, audit kualitas, dan standardisasi proses.", points: ["Sistem: laporan KPI bulanan otomatis dan uji verifikasi tampilan", "Stok: audit fisik suku cadang dan rekonsiliasi dengan sistem", "Proses: pembaruan SOP dan rencana kerja 2028"] },
         ],
       },
       {
         title: "Anggaran & Dukungan Manajemen",
-        lead: "Keputusan yang dibutuhkan untuk memulai perbaikan.",
+        lead: "Ringkasan usulan tambahan; klik kartu biaya di bawah untuk rinciannya.",
         layout: "cards",
         items: [
-          { title: "Mobilitas & SDM", text: "Persetujuan tambahan 2 teknisi dan penempatan teknisi tetap per depo." },
-          { title: "Teknologi", text: "Pengembangan peringatan, integrasi tiket, dan uji verifikasi tampilan." },
-          { title: "Sumber daya perawatan", text: "Stok minimum, alat kerja, pelatihan, dan penggantian aset berbasis risiko." },
-          { title: "Tata kelola", text: "Persetujuan target internal, akses depo, dan tinjauan KPI bulanan." },
+          { value: "+2 teknisi", title: "Mobilitas & SDM", text: "Tambahan 2 teknisi dan penempatan teknisi tetap per depo." },
+          { value: "+ Layanan AI", title: "Teknologi", text: "AI untuk peringatan dini, integrasi tiket, dan rekomendasi kebutuhan stok." },
+          { value: "+ Stok cadangan", title: "Sumber daya perawatan", text: "Ganti 67 layar PID rusak + stok cadangan 2% dari total setiap perangkat, ditambah barang habis pakai." },
+          { value: "Tanpa biaya tambahan", title: "Tata kelola", text: "Persetujuan target internal, akses depo, dan tinjauan KPI bulanan." },
         ],
-        note: "Nominal anggaran menyusul.",
+        totals: [
+          {
+            label: "Capex",
+            value: "± Rp1.175,6 jt",
+            text: "Ganti 67 layar rusak + cadangan 2% tiap perangkat",
+            detail: {
+              definition: "Belanja modal: pembelian perangkat utuh yang dicatat sebagai aset, dipasang di kereta dan dipakai lebih dari 1 tahun. Nilainya disusutkan, bukan langsung menjadi biaya.",
+              rows: [
+                { label: "Layar PID 28\"", sub: "67 rusak (daftar kendala) + 24 cadangan (2% × 1.192) = 91 unit × ±Rp10 jt", value: "Rp910 jt" },
+                { label: "AWK", sub: "8 unit (2% × 355) × ±Rp20 jt", value: "Rp160 jt" },
+                { label: "IP CCTV", sub: "9 unit (2% × 412) × ±Rp5 jt", value: "Rp45 jt" },
+                { label: "IADEA", sub: "5 unit (2% × 206) × ±Rp6,4 jt", value: "Rp32 jt" },
+                { label: "ITA PC", sub: "1 unit (2% × 31) × ±Rp15 jt", value: "Rp15 jt" },
+                { label: "CCTV Recorder", sub: "1 unit (2% × 31) × ±Rp12 jt", value: "Rp12 jt" },
+                { label: "MikroTik", sub: "1 unit (2% × 31) × ±Rp1,6 jt", value: "Rp1,6 jt" },
+                { label: "Total capex", value: "Rp1.175,6 jt", total: true },
+              ],
+              note: "Stok cadangan disiapkan 2% dari total setiap perangkat, dibulatkan ke atas. Harga pasar, perlu penawaran vendor; harga ITA PC dan CCTV Recorder masih asumsi.",
+            },
+          },
+          {
+            label: "Opex per tahun",
+            value: "± Rp151,5 jt",
+            text: "Gaji Rp96 jt + AI Rp5,52 jt + habis pakai Rp50 jt",
+            detail: {
+              definition: "Biaya operasional: pengeluaran rutin yang habis dalam tahun berjalan dan langsung dicatat sebagai biaya.",
+              rows: [
+                { label: "Gaji 2 teknisi", sub: "Rp4.000.000 × 2 orang × 12 bulan, gaji bersih", value: "Rp96 jt" },
+                { label: "Token AI", sub: "US$25 × kurs Rp18.400 × 12 bulan", value: "Rp5,52 jt" },
+                { label: "Barang habis pakai", sub: "Adaptor, kabel, konektor RJ45/M12, HDD recorder", value: "Rp50 jt" },
+                { label: "Total opex", value: "Rp151,5 jt", total: true },
+              ],
+              note: "Rp50 jt barang habis pakai adalah alokasi; rincian per item menyusul karena data NOC belum mencatat komponen yang diganti.",
+            },
+          },
+          {
+            label: "Total tanpa stok",
+            value: "± Rp101,5 jt",
+            text: "Gaji + AI saja; ±Rp8,5 jt per bulan",
+            detail: {
+              definition: "Pengeluaran minimum bila tidak membeli stok perangkat maupun barang habis pakai.",
+              rows: [
+                { label: "Gaji 2 teknisi", value: "Rp96 jt" },
+                { label: "Token AI", value: "Rp5,52 jt" },
+                { label: "Total per tahun", value: "Rp101,5 jt", total: true },
+                { label: "Rata-rata per bulan", value: "Rp8,5 jt" },
+              ],
+              note: "Tanpa stok, perbaikan tetap bergantung pada suku cadang yang tersedia saat ini.",
+            },
+          },
+          {
+            label: "Total dengan stok",
+            value: "± Rp1.327,1 jt",
+            text: "Capex + opex dalam 1 tahun",
+            main: true,
+            detail: {
+              definition: "Seluruh dana yang keluar dalam 1 tahun untuk perbaikan dan penyesuaian.",
+              rows: [
+                { label: "Capex", sub: "Ganti layar rusak + cadangan 2% tiap perangkat", value: "Rp1.175,6 jt" },
+                { label: "Opex", sub: "Gaji, token AI, barang habis pakai", value: "Rp151,5 jt" },
+                { label: "Total per tahun", value: "Rp1.327,1 jt", total: true },
+              ],
+              note: "Belum termasuk pajak dan ongkos kirim; kurs Rp18.400/US$ (26 Nov 2026).",
+            },
+          },
+        ],
+        note: "Stok cadangan 2% dari total setiap perangkat. Asumsi: gaji teknisi Rp4 jt/bulan bersih; kurs Rp18.400/US$; harga pasar online, perlu penawaran vendor; belum termasuk pajak dan ongkir.",
       },
     ],
   },
