@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T02:52:36.269Z",
+  "generatedAt": "2026-11-26T03:47:47.905Z",
   "source": "https://api-noc.sspace.web.id",
   "period": {
     "from": "2026-01-01",
@@ -446,9 +446,9 @@
   ],
   "deviceStatus": {
     "total": 1066,
-    "online": 705,
-    "offline": 361,
-    "uptime": 66
+    "online": 736,
+    "offline": 330,
+    "uptime": 69
   },
   "devices": {
     "total": 1243,
