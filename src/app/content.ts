@@ -37,6 +37,8 @@ export type DetailPage = {
   aside?: { title: string; items: { title: string; text: string }[]; note?: string };
   /** Gambar pendukung di sisi kanan halaman (mis. screenshot aplikasi). */
   image?: { src: string; alt: string; caption?: string };
+  /** Kartu (items) di kolom kiri bertumpuk, grafik (charts) di kolom kanan. */
+  split?: boolean;
   /** Kartu diregangkan mengisi tinggi halaman. */
   fill?: boolean;
   /** Sumber data di footer; default: NOC PID untuk halaman berchart. */
@@ -67,6 +69,15 @@ const pr = noc.process;
 const manualShare = pct(noc.ticketSource.noc + noc.ticketSource.other, sourceTotal);
 const assignedShare = pct(pr.assigned, t.total);
 const mediumShare = `${(Math.floor(((pr.priority.MEDIUM ?? 0) / t.total) * 10000) / 100).toLocaleString("id-ID")}%`;
+const manualCount = noc.ticketSource.noc + noc.ticketSource.other;
+// Beban per orang memakai bulan penuh terakhir saja.
+const lm = noc.lastMonth;
+const lmName = monthName(lm.month);
+const lmDays = new Date(Number(lm.month.slice(0, 4)), Number(lm.month.slice(5, 7)), 0).getDate();
+// Teknisi dengan penugasan sangat sedikit (< 10) tidak ditampilkan di grafik.
+const mainTechs = lm.perTechnician.filter(x => x.assigned >= 10);
+
+const perMonth = sourceTotal / Math.max(dataMonths.length, 1);
 const manualPerPerson = Math.round((pr.ticketsPerDay * noc.ticketSource.noc) / sourceTotal / 2);
 export const nocSnapshot = `Sumber: NOC PID · data per ${new Date(noc.generatedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
 
@@ -131,26 +142,21 @@ export const tiles: Tile[] = [
       },
       {
         title: "Kendala Operasional",
-        lead: "Kekurangan dari sisi sistem, suku cadang, SDM, dan kondisi layar.",
+        lead: "Fakta utama dari sistem, suku cadang, dan SDM; analisa kesenjangan dibahas di topik 03.",
         layout: "cards",
         items: [
           {
             title: "Kendala sistem",
             points: [
-              `Prioritas belum dibedakan: ${mediumShare} tiket berstatus MEDIUM, sehingga satu rangkaian mati ditangani sama dengan gangguan ringan`,
-              `${pct(t.resolvedBySystem, t.total)} tiket ditutup otomatis saat ping pulih, tanpa bukti layar tayang`,
-              `Hanya ${assignedShare} tiket (${fmt(pr.assigned)} dari ${fmt(t.total)}) yang ditugaskan ke teknisi; sisanya selesai tanpa catatan pengecekan fisik perangkat`,
-              "Ping tidak mendeteksi layar mati, bergaris, atau redup selama perangkatnya tetap daring",
-              "Belum ada jadwal perawatan preventif di sistem",
+              `Hanya ${assignedShare} tiket (${fmt(pr.assigned)} dari ${fmt(t.total)}) yang ditugaskan ke teknisi`,
+              "Sisanya selesai tanpa catatan pengecekan fisik perangkat",
             ],
           },
           {
             title: "Kendala suku cadang",
             points: [
-              "Belum ada modul stok, permintaan, dan reservasi suku cadang di sistem NOC",
-              "Kebutuhan komponen masih dilaporkan kru secara manual",
-              "Belum ada stok minimum dan keterlacakan nomor seri",
-              `Perbaikan layar rata-rata ${ss.avgDays} hari (median ${ss.medianDays} hari); indikasi menunggu suku cadang`,
+              "Belum ada modul stok di sistem NOC",
+              `Median perbaikan layar ${ss.medianDays} hari; indikasi menunggu suku cadang`,
             ],
           },
           {
@@ -158,17 +164,6 @@ export const tiles: Tile[] = [
             points: [
               `2 personel NOC menerbitkan ±${manualPerPerson} tiket manual per orang per hari`,
               `${pr.technicians} teknisi terdaftar untuk 1.192 layar di 298 kereta`,
-              "Shift pagi/sore: 1 ketua tim + 2 PKL",
-              "4 kru malam dengan 1 mobil untuk 8 depo",
-            ],
-          },
-          {
-            title: "Kendala layar",
-            points: [
-              `${ss.total} layar PID bermasalah tercatat di ${ss.rangkaian} rangkaian (KA)`,
-              `${ss.byIssue.off} layar mati, ${ss.byIssue.bergaris} bergaris, ${ss.byIssue.redup} redup`,
-              `Baru ${ss.done} layar tercatat selesai; ${ss.total - ss.done} belum`,
-              "Dicatat manual di spreadsheet terpisah, belum masuk tiket NOC",
             ],
           },
         ],
@@ -217,8 +212,6 @@ export const tiles: Tile[] = [
           { value: "298", title: "kereta", text: "Empat layar per kereta" },
           { value: "31", title: "rangkaian", text: "Cakupan armada" },
           { value: "8", title: "depo", text: "Lokasi perawatan" },
-          { value: "24", title: "jam", text: "Tiga shift operasional; mobilitas depo malam 21.00–05.00" },
-          { value: "1", title: "mobil", text: "Kendaraan operasional kru malam" },
         ],
       },
       {
@@ -229,13 +222,7 @@ export const tiles: Tile[] = [
           {
             value: "1.192",
             text: "Layar PID",
-            points: [
-              `${ss.total} rusak tercatat (${(ss.total / 1192 * 100).toFixed(1).replace(".", ",")}%)`,
-              `${ss.byIssue.off} mati`,
-              `${ss.byIssue.bergaris} bergaris`,
-              `${ss.byIssue.redup} redup`,
-              `${ss.byIssue.kosong} tanpa keterangan`,
-            ],
+            points: [`${ss.total} rusak tercatat (${(ss.total / 1192 * 100).toFixed(1).replace(".", ",")}%); rincian di slide Kendala Layar`],
           },
           { value: "31", text: "ITA PC" },
           { value: "31", text: "CCTV Recorder" },
@@ -252,7 +239,7 @@ export const tiles: Tile[] = [
         items: [
           { value: "05.00–14.00", title: "Shift pagi", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
           { value: "14.00–22.00", title: "Shift sore", text: "1 ketua tim + 2 PKL; perbaikan sesuai tiket." },
-          { value: "21.00–05.00", title: "Shift malam", text: "4 kru; mobilitas dan perawatan di depo." },
+          { value: "21.00–05.00", title: "Shift malam", text: "4 kru berbagi 1 mobil untuk menjangkau 8 depo; perbaikan berat dikerjakan saat kereta masuk depo." },
           { value: "2 orang", title: "NOC", text: "Pemantauan dan penerbitan tiket; jadwal 24 jam, 5 hari kerja." },
         ],
       },
@@ -333,7 +320,6 @@ export const tiles: Tile[] = [
             { name: "Selesai oleh tim maintenance", values: dataMonths.map(m => m.resolved - m.bySystem) },
           ],
         }],
-        note: `${pct(t.resolvedBySystem, t.total)} tiket ditutup otomatis oleh sistem saat perangkat kembali daring.`,
       },
       {
         title: "Insiden per Jenis Perangkat",
@@ -461,6 +447,20 @@ export const tiles: Tile[] = [
       {
         title: "Bukti dari Data NOC",
         lead: "Ping sudah otomatis, tetapi penerbitan tiket masih bergantung pada input manual NOC.",
+        layout: "stats",
+        split: true,
+        items: [
+          {
+            value: fmt(pr.ticketsPerDay),
+            title: "Rata-rata tiket per hari",
+            points: [`±${fmt(Math.round((pr.ticketsPerDay * manualCount) / sourceTotal))} manual oleh petugas`, `±${fmt(Math.round((pr.ticketsPerDay * noc.ticketSource.system) / sourceTotal))} otomatis oleh sistem`],
+          },
+          {
+            value: fmt(Math.round(perMonth)),
+            title: "Rata-rata tiket per bulan",
+            points: [`±${fmt(Math.round(manualCount / Math.max(dataMonths.length, 1)))} manual oleh petugas`, `±${fmt(Math.round(noc.ticketSource.system / Math.max(dataMonths.length, 1)))} otomatis oleh sistem`, `Dihitung dari ${dataMonths.length} bulan data (${monthName(noc.firstMonthWithData)} – ${monthName(noc.period.to.slice(0, 7))})`],
+          },
+        ],
         charts: [
           {
             kind: "donut",
@@ -471,17 +471,38 @@ export const tiles: Tile[] = [
               { label: "Otomatis oleh sistem", value: noc.ticketSource.system },
             ],
           },
+        ],
+      },
+      {
+        title: "Beban Tiket per Orang",
+        lead: `Data ${lmName}: ${fmt(lm.total)} tiket tercatat, ${fmt(lm.assigned)} ditugaskan ke teknisi; nama disamarkan.`,
+        layout: "cards",
+        items: [
           {
-            kind: "donut",
-            title: "Penutupan tiket selesai",
-            center: fmt(t.resolved),
-            segments: [
-              { label: "Otomatis oleh sistem", value: t.resolvedBySystem },
-              { label: "Oleh tim maintenance", value: t.resolved - t.resolvedBySystem },
+            value: `±${fmt(Math.round(lm.nocCreators.reduce((sum, c) => sum + c.count, 0) / Math.max(lm.nocCreators.length, 1)))} tiket`,
+            title: "Dibuat per petugas NOC",
+            points: [
+              ...lm.nocCreators.map(c => `${c.label}: ${fmt(c.count)} tiket`),
+              `±${fmt(Math.round(lm.nocCreators[0].count / lmDays))} tiket per petugas per hari`,
+            ],
+          },
+          {
+            value: `${fmt(lm.total)} vs ${fmt(lm.assigned)}`,
+            title: "Kenapa total tiket dan hasil kerja berbeda",
+            points: [
+              `${pct(lm.resolvedBySystem, lm.total)} tiket ditutup otomatis saat ping pulih, tanpa teknisi`,
+              "Perangkat putus-sambung menerbitkan tiket berulang untuk masalah yang sama",
+              "Kru malam terbatas mobilitas (1 mobil untuk 8 depo) dan fokus pada pekerjaan berat, sehingga tiket yang tercatat per orang sedikit",
             ],
           },
         ],
-        note: "Tiket yang ditutup sistem perlu verifikasi tayangan agar layar benar-benar tampil.",
+        charts: [{
+          kind: "hbar",
+          title: `Penugasan per teknisi · ${lmName}`,
+          unit: "penugasan",
+          rows: mainTechs.map(x => ({ label: x.label, sub: [x.layer, x.team].filter(Boolean).join(" · ") || "-", value: x.assigned })),
+        }],
+        note: `${lm.perTechnician.length - mainTechs.length} teknisi dengan kurang dari 10 penugasan tidak ditampilkan.`,
       },
     ],
   },
@@ -764,16 +785,6 @@ export const tiles: Tile[] = [
         ],
         note: "Target dihitung dari tiket dibuat hingga layar terverifikasi tayang kembali. Ini target internal awal, bukan komitmen kontraktual; alasan tunggu dan eskalasi dicatat untuk semua prioritas.",
       },
-      {
-        title: "06 · Kesiapan Klien 365",
-        lead: "Media siap diperiksa kapan saja tanpa pemberitahuan.",
-        layout: "cards",
-        items: [
-          { title: "Inspeksi acak", text: "Sampel rangkaian diperiksa rutin tanpa pemberitahuan khusus." },
-          { title: "Verifikasi pascaperbaikan", text: "Validasi fungsi dan bukti tampilan sebelum tiket ditutup." },
-          { title: "Tinjauan mutu mingguan", text: "Rekonsiliasi keluhan, tiket, dan masalah berulang; tindak lanjuti temuan." },
-        ],
-      },
     ],
   },
   {
@@ -911,6 +922,89 @@ export const tiles: Tile[] = [
           },
         ],
         note: "Suku cadang dari daftar kebutuhan (jenis, harga, jumlah). Asumsi: gaji teknisi Rp4 jt/bulan bersih; kurs Rp18.400/US$; belum termasuk pajak dan ongkir.",
+      },
+      {
+        title: "Risiko & Mitigasi",
+        lead: "Risiko utama pelaksanaan 2027 dan langkah pengendaliannya.",
+        layout: "cards",
+        fill: true,
+        items: [
+          {
+            value: "Dampak tinggi",
+            title: "Waktu tunggu pengadaan",
+            points: ["CCTV dan NVR bernilai besar, berpotensi inden dari vendor", "Mitigasi: pesan bertahap mulai Kuartal 1, utamakan gerbong paling sering bermasalah, kunci harga dengan vendor"],
+          },
+          {
+            value: "Dampak tinggi",
+            title: "Perangkat tidak diproduksi lagi",
+            points: ["AWK-5232 sudah dihentikan produsennya", "Mitigasi: uji seri pengganti di 1 rangkaian, manfaatkan unit rusak sebagai sumber komponen"],
+          },
+          {
+            value: "Dampak sedang",
+            title: "Akses kereta dan depo",
+            points: ["Perbaikan berat hanya bisa saat kereta masuk depo", "Mitigasi: jadwal bersama pihak depo, maksimalkan shift malam 21.00–05.00, catat waktu tunggu akses di tiket"],
+          },
+          {
+            value: "Dampak tinggi",
+            title: "Anggaran tidak disetujui penuh",
+            points: ["Stok suku cadang tidak tersedia, perbaikan tetap lambat", "Mitigasi: jalankan opsi minimum (±Rp101,5 jt), pengadaan suku cadang bertahap per prioritas"],
+          },
+          {
+            value: "Dampak sedang",
+            title: "Keterbatasan data dan harga",
+            points: ["Data NOC baru 6 bulan; harga belum dari penawaran resmi", "Mitigasi: minta minimal 3 penawaran vendor, tinjau ulang target dan stok tiap kuartal"],
+          },
+          {
+            value: "Dampak sedang",
+            title: "Ketersediaan teknisi",
+            points: ["Gaji usulan di bawah UMR Jakarta berisiko pada rekrutmen dan retensi", "Mitigasi: pastikan status kerja dengan HR, SOP dan pelatihan agar pengetahuan tidak bergantung pada satu orang"],
+          },
+        ],
+      },
+      {
+        title: "Ringkasan Keputusan",
+        lead: "Masalah, usulan, biaya, dan keputusan yang diminta dari manajemen.",
+        layout: "cards",
+        fill: true,
+        items: [
+          {
+            value: `${noc.deviceStatus.uptime}% perangkat online`,
+            title: "Masalah",
+            points: [
+              `${manualShare} tiket masih dibuat manual`,
+              `Perbaikan layar rata-rata ${ss.avgDays} hari; ${ss.total} layar rusak tercatat`,
+              "1 mobil untuk 8 depo; belum ada perawatan preventif",
+            ],
+          },
+          {
+            value: "Target ketersediaan ≥ 99%",
+            title: "Usulan",
+            points: [
+              "Pemantauan cerdas: tiket otomatis dan verifikasi layar tayang",
+              "Perawatan preventif terjadwal dan mobilitas kru",
+              "Kendali suku cadang dan manajemen layanan",
+            ],
+          },
+          {
+            value: "± Rp2,15 M per tahun",
+            title: "Biaya",
+            points: [
+              "Capex suku cadang ± Rp2.048,3 jt",
+              "Opex gaji 2 teknisi + AI ± Rp101,5 jt",
+              "Opsi minimum tanpa stok ± Rp101,5 jt",
+            ],
+          },
+          {
+            value: "3 keputusan",
+            title: "Yang diminta",
+            points: [
+              "Persetujuan anggaran capex suku cadang",
+              "Persetujuan tambahan 2 teknisi dan layanan AI",
+              "Persetujuan target 2027 dan tinjauan KPI bulanan",
+            ],
+          },
+        ],
+        note: "Rincian biaya di halaman Anggaran & Dukungan Manajemen; belum termasuk pajak dan ongkos kirim.",
       },
     ],
   },

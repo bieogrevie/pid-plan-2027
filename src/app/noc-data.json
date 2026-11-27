@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-26T03:47:47.905Z",
+  "generatedAt": "2026-11-27T03:06:55.640Z",
   "source": "https://api-noc.sspace.web.id",
   "period": {
     "from": "2026-01-01",
@@ -372,6 +372,238 @@
     "technicians": 9,
     "pingIntervalMinutes": 1
   },
+  "perTechnician": [
+    {
+      "label": "Teknisi A",
+      "layer": "L1",
+      "team": "Team 1",
+      "assigned": 4130,
+      "completed": 4000
+    },
+    {
+      "label": "Teknisi B",
+      "layer": "L2",
+      "team": "Team 3",
+      "assigned": 874,
+      "completed": 870
+    },
+    {
+      "label": "Teknisi C",
+      "layer": "L2",
+      "team": "Team 2",
+      "assigned": 305,
+      "completed": 302
+    },
+    {
+      "label": "Teknisi D",
+      "layer": "L1",
+      "team": "Team 1",
+      "assigned": 287,
+      "completed": 287
+    },
+    {
+      "label": "Teknisi E",
+      "layer": "L2",
+      "team": "Team 3",
+      "assigned": 147,
+      "completed": 144
+    },
+    {
+      "label": "Teknisi F",
+      "layer": "L2",
+      "team": "Team 2",
+      "assigned": 49,
+      "completed": 48
+    },
+    {
+      "label": "Teknisi G",
+      "layer": null,
+      "team": "Team 1 - Malam",
+      "assigned": 8,
+      "completed": 8
+    },
+    {
+      "label": "Teknisi H",
+      "layer": null,
+      "team": null,
+      "assigned": 2,
+      "completed": 2
+    },
+    {
+      "label": "Teknisi I",
+      "layer": null,
+      "team": "Team 2 - Malam",
+      "assigned": 1,
+      "completed": 1
+    }
+  ],
+  "nocCreators": [
+    {
+      "label": "Petugas NOC A",
+      "count": 12185
+    },
+    {
+      "label": "Petugas NOC B",
+      "count": 10746
+    },
+    {
+      "label": "Petugas NOC C",
+      "count": 243
+    }
+  ],
+  "lastMonth": {
+    "month": "2026-10",
+    "total": 5332,
+    "resolvedBySystem": 3349,
+    "assigned": 1972,
+    "perTechnician": [
+      {
+        "label": "Teknisi A",
+        "layer": "L1",
+        "team": "Team 1",
+        "assigned": 1287,
+        "completed": 1283,
+        "activeDays": 29,
+        "medianPerDay": 42,
+        "shift": {
+          "pagi": 1249,
+          "sore": 34,
+          "malam": 0
+        },
+        "avgNoteWords": 2.6
+      },
+      {
+        "label": "Teknisi B",
+        "layer": "L2",
+        "team": "Team 3",
+        "assigned": 380,
+        "completed": 378,
+        "activeDays": 11,
+        "medianPerDay": 35,
+        "shift": {
+          "pagi": 0,
+          "sore": 378,
+          "malam": 0
+        },
+        "avgNoteWords": 2.9
+      },
+      {
+        "label": "Teknisi C",
+        "layer": "L2",
+        "team": "Team 2",
+        "assigned": 133,
+        "completed": 133,
+        "activeDays": 3,
+        "medianPerDay": 36,
+        "shift": {
+          "pagi": 46,
+          "sore": 50,
+          "malam": 37
+        },
+        "avgNoteWords": 8
+      },
+      {
+        "label": "Teknisi D",
+        "layer": "L2",
+        "team": "Team 3",
+        "assigned": 78,
+        "completed": 78,
+        "activeDays": 6,
+        "medianPerDay": 13,
+        "shift": {
+          "pagi": 0,
+          "sore": 0,
+          "malam": 78
+        },
+        "avgNoteWords": 5
+      },
+      {
+        "label": "Teknisi E",
+        "layer": "L1",
+        "team": "Team 1",
+        "assigned": 57,
+        "completed": 57,
+        "activeDays": 8,
+        "medianPerDay": 7,
+        "shift": {
+          "pagi": 1,
+          "sore": 53,
+          "malam": 3
+        },
+        "avgNoteWords": 3
+      },
+      {
+        "label": "Teknisi F",
+        "layer": "L2",
+        "team": "Team 2",
+        "assigned": 31,
+        "completed": 31,
+        "activeDays": 7,
+        "medianPerDay": 3,
+        "shift": {
+          "pagi": 5,
+          "sore": 0,
+          "malam": 26
+        },
+        "avgNoteWords": 4
+      },
+      {
+        "label": "Teknisi G",
+        "layer": null,
+        "team": "Team 1 - Malam",
+        "assigned": 7,
+        "completed": 7,
+        "activeDays": 1,
+        "medianPerDay": 7,
+        "shift": {
+          "pagi": 0,
+          "sore": 0,
+          "malam": 7
+        },
+        "avgNoteWords": 11.1
+      },
+      {
+        "label": "Teknisi H",
+        "layer": null,
+        "team": null,
+        "assigned": 2,
+        "completed": 2,
+        "activeDays": 2,
+        "medianPerDay": 1,
+        "shift": {
+          "pagi": 1,
+          "sore": 0,
+          "malam": 1
+        },
+        "avgNoteWords": 3
+      },
+      {
+        "label": "Teknisi I",
+        "layer": null,
+        "team": "Team 2 - Malam",
+        "assigned": 1,
+        "completed": 1,
+        "activeDays": 1,
+        "medianPerDay": 1,
+        "shift": {
+          "pagi": 0,
+          "sore": 0,
+          "malam": 1
+        },
+        "avgNoteWords": 2
+      }
+    ],
+    "nocCreators": [
+      {
+        "label": "Petugas NOC A",
+        "count": 2664
+      },
+      {
+        "label": "Petugas NOC B",
+        "count": 2354
+      }
+    ]
+  },
   "topDown": [
     {
       "name": "AWK 5232 - 1",
@@ -446,9 +678,9 @@
   ],
   "deviceStatus": {
     "total": 1066,
-    "online": 736,
-    "offline": 330,
-    "uptime": 69
+    "online": 572,
+    "offline": 494,
+    "uptime": 54
   },
   "devices": {
     "total": 1243,

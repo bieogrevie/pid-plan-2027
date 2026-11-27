@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { nocSnapshot, tiles, type CostTotal, type DetailPage } from "./content";
 import { ChartBlock } from "./charts";
 
@@ -56,8 +56,9 @@ function CostTotals({ totals }: { totals: CostTotal[] }) {
 }
 
 function DetailBody({ page }: { page: DetailPage }) {
-  return <>
-    {page.items && <div className={`detail-items layout-${page.layout ?? "cards"}`} style={{ "--cols": columnsFor(page.items.length) } as CSSProperties}>
+  const Wrap = page.split ? "div" : Fragment;
+  return <Wrap {...(page.split ? { className: "detail-split" } : {})}>
+    {page.items && <div className={`detail-items layout-${page.layout ?? "cards"}`} style={{ "--cols": page.split ? 1 : columnsFor(page.items.length) } as CSSProperties}>
       {page.items.map((item, i) => <article key={i} className="detail-item">
         {item.value && <span className="detail-value">{item.value}</span>}
         {item.title && <h3>{item.title}</h3>}
@@ -81,7 +82,7 @@ function DetailBody({ page }: { page: DetailPage }) {
         {page.aside.note && <small>{page.aside.note}</small>}
       </aside> : undefined} />)}
     </div>}
-  </>;
+  </Wrap>;
 }
 
 // Sapaan sesuai jam lokal perangkat (menggantikan jam di layar awal).

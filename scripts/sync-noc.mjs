@@ -102,6 +102,61 @@ try {
     technicians: Array.isArray(technicians) ? technicians.length : (technicians.data?.length ?? null),
     pingIntervalMinutes: scheduler.interval_minutes ?? null,
   };
+  // Beban per teknisi dari penugasan tiket; nama disamarkan (Teknisi A, B, ...), hanya level dan tim yang dibawa.
+  const techs = new Map();
+  for (const tk of tickets.values()) {
+    for (const a of tk.assignments ?? []) {
+      const t = techs.get(a.technician_id) ?? { layer: a.technician?.layer ?? null, team: a.technician?.team ?? null, assigned: 0, completed: 0 };
+      t.assigned++;
+      if (a.completion) t.completed++;
+      techs.set(a.technician_id, t);
+    }
+  }
+  const perTechnician = [...techs.values()].sort((x, y) => y.assigned - x.assigned)
+    .map((t, i) => ({ label: `Teknisi ${String.fromCharCode(65 + i)}`, ...t }));
+  // Pembuat tiket NOC per orang, disamarkan (Petugas NOC A, B, ...).
+  const nocCreators = summary.creators.filter(c => /noc/i.test(c.name) && !/test/i.test(c.name))
+    .sort((x, y) => y.count - x.count).map((c, i) => ({ label: `Petugas NOC ${String.fromCharCode(65 + i)}`, count: c.count }));
+  // Bulan penuh terakhir: beban per teknisi + pola kerja (shift penyelesaian, hari aktif, panjang catatan).
+  const lastMonthKey = [...monthly].reverse().find(m => m.total > 0)?.month;
+  const lastSummary = lastMonthKey ? await get(`/tickets/summary?from=${lastMonthKey}-01&to=${lastMonthKey}-${pad(lastDay(YEAR, Number(lastMonthKey.slice(5))))}`) : null;
+  const lastTickets = [...tickets.values()].filter(tk => {
+    const d = new Date(new Date(tk.created_at).getTime() + 7 * 36e5).toISOString().slice(0, 7);
+    return d === lastMonthKey;
+  });
+  const lastTechs = new Map();
+  for (const tk of lastTickets) {
+    for (const a of tk.assignments ?? []) {
+      const t = lastTechs.get(a.technician_id) ?? { layer: a.technician?.layer ?? null, team: a.technician?.team ?? null, assigned: 0, completed: 0, shift: { pagi: 0, sore: 0, malam: 0 }, days: new Map(), words: 0 };
+      t.assigned++;
+      if (a.completion) {
+        t.completed++;
+        const wib = new Date(new Date(a.completion.completed_at).getTime() + 7 * 36e5);
+        const h = wib.getUTCHours();
+        t.shift[h >= 5 && h < 14 ? "pagi" : h >= 14 && h < 21 ? "sore" : "malam"]++;
+        const day = wib.toISOString().slice(0, 10);
+        t.days.set(day, (t.days.get(day) ?? 0) + 1);
+        t.words += (a.completion.note ?? "").trim().split(/\s+/).filter(Boolean).length;
+      }
+      lastTechs.set(a.technician_id, t);
+    }
+  }
+  const lastMonth = lastMonthKey && {
+    month: lastMonthKey,
+    total: lastSummary.total,
+    resolvedBySystem: lastSummary.resolved_by_system,
+    assigned: lastTickets.filter(tk => tk.assignments?.length).length,
+    perTechnician: [...lastTechs.values()].sort((x, y) => y.assigned - x.assigned).map((t, i) => {
+      const perDay = [...t.days.values()].sort((x, y) => x - y);
+      return {
+        label: `Teknisi ${String.fromCharCode(65 + i)}`, layer: t.layer, team: t.team, assigned: t.assigned, completed: t.completed,
+        activeDays: t.days.size, medianPerDay: perDay.length ? perDay[Math.floor(perDay.length / 2)] : 0, shift: t.shift,
+        avgNoteWords: t.completed ? Math.round((t.words / t.completed) * 10) / 10 : 0,
+      };
+    }),
+    nocCreators: lastSummary.creators.filter(c => /noc/i.test(c.name) && !/test/i.test(c.name))
+      .sort((x, y) => y.count - x.count).map((c, i) => ({ label: `Petugas NOC ${String.fromCharCode(65 + i)}`, count: c.count })),
+  };
   // Nama pembuat tiket digabung per kategori agar tidak menampilkan nama personel.
   const source = { system: 0, noc: 0, other: 0 };
   for (const c of summary.creators) {
@@ -128,6 +183,9 @@ try {
     ticketSource: source,
     byType,
     process,
+    perTechnician,
+    nocCreators,
+    lastMonth,
     topDown: deviceSummary.top_down.map(d => ({
       name: d.name, krl: d.krl_name, gerbong: d.gerbong,
       downCount: d.down_count, downtimeHours: Math.round(d.downtime_minutes / 60),

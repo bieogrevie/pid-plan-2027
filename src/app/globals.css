@@ -590,3 +590,34 @@ body,.metro-shell{font-family:var(--font-body),Arial,sans-serif;font-weight:500}
   .metro-shell>.greeting-link{left:16px}
   .metro-shell>.closing-link{right:16px}
 }
+
+/* Halaman fill 4 kartu tanpa contoh kasus (mis. Ringkasan Keputusan): huruf besar agar terbaca dari jauh. */
+.detail-content.fill .detail-items:has(> :nth-child(4)):not(:has(> :nth-child(5))):not(:has(.detail-example)) .detail-value{font-size:clamp(15px,1.25vw,24px)}
+.detail-content.fill .detail-items:has(> :nth-child(4)):not(:has(> :nth-child(5))):not(:has(.detail-example)) h3{font-size:clamp(22px,2.1vw,40px)}
+.detail-content.fill .detail-items:has(> :nth-child(4)):not(:has(> :nth-child(5))):not(:has(.detail-example)) .detail-points{font-size:clamp(15px,1.3vw,25px);gap:2vh;line-height:1.4}
+
+/* Target Kinerja: angka target di tengah kartu dengan jarak atas-bawah. */
+.detail-content.fill .layout-stats:has(.detail-example) .detail-value{display:block;align-self:stretch;text-align:center;margin:clamp(8px,2vh,26px) 0 clamp(10px,2.4vh,30px)}
+
+/* Halaman split: kartu angka bertumpuk di kiri, grafik penuh di kanan. */
+.detail-split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,2fr);gap:clamp(12px,1.4vw,28px);align-items:stretch;flex:1 1 auto;min-height:0}
+.detail-split>.detail-items{grid-template-columns:1fr!important;grid-auto-rows:auto;grid-template-rows:auto 1fr;margin:0}
+.detail-split>.detail-items .detail-item{justify-content:center}
+.detail-split>.detail-charts{grid-template-columns:1fr!important;margin:0}
+.detail-split>.detail-charts>.chart{height:100%}
+@media(max-width:900px){.detail-split{grid-template-columns:1fr}}
+.detail-split .hbar-list{gap:clamp(2px,.4vh,6px)}
+.detail-split .hbar-track{height:clamp(8px,1vh,14px)}
+.detail-split .hbar-label{flex-direction:row;align-items:baseline;gap:8px}
+/* Ukuran huruf proporsional untuk halaman split (kartu kiri + grafik kanan). */
+.detail-split .detail-item .detail-value{font-size:clamp(26px,2.4vw,46px)}
+.detail-split .detail-item h3{font-size:clamp(15px,1.2vw,23px);margin-bottom:clamp(6px,1.2vh,14px)}
+.detail-split .detail-points{font-size:clamp(13px,.92vw,18px);line-height:1.35;gap:clamp(3px,.6vh,8px)}
+.detail-split .chart figcaption{font-size:clamp(15px,1.15vw,22px)}
+.detail-split .hbar-label strong{font-size:clamp(14px,1.1vw,21px)}
+.detail-split .hbar-label small{font-size:clamp(11px,.85vw,16px)}
+.detail-split .hbar-row b{font-size:clamp(16px,1.3vw,25px)}
+/* Halaman kartu + grafik batang (mis. Beban Tiket per Orang): baris grafik dipadatkan agar muat di bawah kartu. */
+.detail-content.compact .chart-hbar .hbar-list{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.2vh,14px) clamp(24px,3vw,56px)}
+.detail-content.compact .chart-hbar .hbar-track{height:clamp(8px,1vh,14px)}
+.detail-content.compact .chart-hbar .hbar-label{flex-direction:row;align-items:baseline;gap:8px}
